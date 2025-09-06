@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
@@ -21,32 +22,32 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $request->validate([
+        // validasi input
+        $credentials = $request->validate([
             'email' => 'required|email',
-            'password' => 'required|string',
+            'password' => 'required|string|min:6',
         ]);
 
-        $credentials = $request->only('email', 'password');
+        // cari user
+        $user = User::where('email', $credentials['email'])->first();
 
-        // cek apakah ada user dengan email dan password yang sesuai
-        if (!User::where('email', $credentials['email'])->exists()) {
-            return redirect()->back()->withErrors(['email' => 'Email tidak terdaftar. Silakan coba lagi.']);
+        if (!$user || !Hash::check($credentials['password'], $user->password)) {
+            return back()->withErrors([
+                'email' => 'Email atau password salah.',
+            ])->onlyInput('email');
         }
 
-        // cek apakah password yang dimasukkan benar
-        if (!auth()->validate($credentials)) {
-            return redirect()->back()->withErrors(['password' => 'Password salah. Silakan coba lagi.']);
-        }
+        // login user
+        Auth::login($user);
 
-        // cek apakah user berhasil login
-        if (auth()->attempt($credentials)) {
-            $user = auth()->user();
-            if ($user->role === 'admin') {
-                return redirect()->route('admin.requests.index')->with('success', 'Selamat datang, Admin!');
-            }
-            return redirect()->route('researchrequest.user', ['userId' => $user->id])->with('success', 'Selamat datang, Mahasiswa!');
-        }
+        // cek kategori dulu (sementara pakai dd)
+        dd([
+            'message' => 'Login berhasil!',
+            'user' => $user,
+            'kategori' => $user->kategori
+        ]);
     }
+
 
     public function register(Request $request)
     {
