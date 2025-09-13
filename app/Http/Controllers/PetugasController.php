@@ -10,9 +10,16 @@ class PetugasController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function loginPetugas(Request $request){
+        dd($request->all());
+        $valdate = $request->validate([
+            
+        ]);
+
+    }
+    public function loginPetugasView()
     {
-        //
+        return view('auth.login-petugas');
     }
 
     /**
