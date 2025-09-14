@@ -40,12 +40,8 @@ class AuthController extends Controller
         // login user
         Auth::login($user);
 
-        // cek kategori dulu (sementara pakai dd)
-        dd([
-            'message' => 'Login berhasil!',
-            'user' => $user,
-            'kategori' => $user->kategori
-        ]);
+        // redirect ke halaman dashboard
+        return redirect()->route('dashboardPage');
     }
 
 
