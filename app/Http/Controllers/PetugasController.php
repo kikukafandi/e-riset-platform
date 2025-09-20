@@ -4,69 +4,40 @@ namespace App\Http\Controllers;
 
 use App\Models\Petugas;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PetugasController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function loginPetugas(Request $request){
-        dd($request->all());
-        $valdate = $request->validate([
-            
-        ]);
-
-    }
     public function loginPetugasView()
     {
         return view('auth.login-petugas');
     }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function loginPetugas(Request $request)
     {
-        //
+        // validasi input
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
+        ]);
+
+        // cek login pakai guard petugas
+        if (Auth::guard('petugas')->attempt($credentials, $request->filled('remember'))) {
+            $request->session()->regenerate();
+
+            return redirect()->intended('/dashboard')
+                ->with('success', 'Selamat datang, ' . Auth::guard('petugas')->user()->nama);
+        }
+
+        return back()->with('error', 'Email atau password salah!');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function logoutPetugas(Request $request)
     {
-        //
-    }
+        Auth::guard('petugas')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Petugas $petugas)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Petugas $petugas)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Petugas $petugas)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Petugas $petugas)
-    {
-        //
+        return redirect()->route('login.petugas')
+            ->with('success', 'Anda sudah logout.');
     }
 }
