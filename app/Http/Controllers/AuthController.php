@@ -100,8 +100,12 @@ class AuthController extends Controller
         return redirect()->route('loginPage')->with('success', 'Akun berhasil dibuat! Silakan login.');
     }
 
-    public function logout()
+    public function logout(Request $request)
     {
-        // ini untuk logout
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('loginPage')->with('success', 'Anda berhasil logout.');
     }
 }

@@ -65,6 +65,29 @@ class DokumenPermohonanController extends Controller
         return redirect()->back()->with('success', 'Permohonan dokumen berhasil dikirim!');
     }
 
+    public function total()
+    {
+        // Logika untuk mengambil semua data permohonan dari database
+        return view('dashboard.manage-petugas.total_permohonan');
+    }
+
+    public function pending()
+    {
+        // Logika untuk mengambil data permohonan yang pending
+        return view('dashboard.manage-petugas.pending');
+    }
+
+    public function disetujui()
+    {
+        // Logika untuk mengambil data permohonan yang disetujui
+        return view('dashboard.manage-petugas.disetujui');
+    }
+
+    public function ditolak()
+    {
+        // Logika untuk mengambil data permohonan yang ditolak
+        return view('dashboard.manage-petugas.ditolak');
+    }
     /**
      * Display the specified resource.
      */

@@ -20,6 +20,7 @@ Route::post('/login', [AuthController::class, 'login'])->name('login');
 
 Route::get('/register', [AuthController::class, 'registerPage'])->name('registerPage');
 Route::post('/register', [AuthController::class, 'register'])->name('register');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 /*
 |--------------------------------------------------------------------------
@@ -28,6 +29,7 @@ Route::post('/register', [AuthController::class, 'register'])->name('register');
 */
 Route::get('/login-petugas', [PetugasController::class, 'loginPetugasView'])->name('login.petugas.view');
 Route::post('/login-petugas', [PetugasController::class, 'loginPetugas'])->name('login.petugas');
+Route::post('/logout-petugas', [PetugasController::class, 'logoutPetugas'])->name('logout.petugas');
 
 /*
 |--------------------------------------------------------------------------
@@ -61,4 +63,14 @@ Route::middleware(['CekLogin:petugas'])->group(function () {
     })->name('dashboard.petugas');
 
     Route::get('/manage-petugas', [PetugasController::class, 'index'])->name('manage.petugas');
+    Route::get('/manage-petugas/create', [PetugasController::class, 'create'])->name('manage.petugas.create');
+    Route::post('/manage-petugas', [PetugasController::class, 'store'])->name('manage.petugas.store');
+    Route::get('/manage-petugas/{id}/edit', [PetugasController::class, 'edit'])->name('manage.petugas.edit');
+    Route::put('/manage-petugas/{id}', [PetugasController::class, 'update'])->name('manage.petugas.update');
+    Route::delete('/manage-petugas/{id}', [PetugasController::class, 'destroy'])->name('manage.petugas.destroy');
+
+    Route::get('/petugas/permohonan/total', [DokumenPermohonanController::class, 'total'])->name('permohonan.total');
+    Route::get('/petugas/permohonan/pending', [DokumenPermohonanController::class, 'pending'])->name('permohonan.pending');
+    Route::get('/petugas/permohonan/disetujui', [DokumenPermohonanController::class, 'disetujui'])->name('permohonan.disetujui');
+    Route::get('/petugas/permohonan/ditolak', [DokumenPermohonanController::class, 'ditolak'])->name('permohonan.ditolak');
 });

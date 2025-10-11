@@ -24,7 +24,7 @@ class PetugasController extends Controller
         if (Auth::guard('petugas')->attempt($credentials, $request->filled('remember'))) {
             $request->session()->regenerate();
 
-            return redirect()->intended('/dashboard')
+            return redirect()->route('dashboard.petugas')
                 ->with('success', 'Selamat datang, ' . Auth::guard('petugas')->user()->nama);
         }
 
@@ -39,5 +39,59 @@ class PetugasController extends Controller
 
         return redirect()->route('login.petugas')
             ->with('success', 'Anda sudah logout.');
+    }
+    public function index()
+    {
+        $petugas = Petugas::all();
+        return view('dashboard.manage-petugas.index', compact('petugas'));
+    }
+    public function create()
+    {
+        return view('dashboard.manage-petugas.create');
+    }
+    public function store(Request $request)
+    {
+        $request->validate([
+            'nama'    => 'required|string|max:255',
+            'email'   => 'required|email|unique:petugas,email',
+            'nip'     => 'required|string|max:20|unique:petugas,nip',
+            'jabatan' => 'required|string|max:100',
+            'role'    => 'required|in:super_user,pelaksana,eselon_iv,eselon_iii,eselon_ii',
+        ]);
+
+        Petugas::create($request->all());
+
+        return redirect()->route('manage.petugas')
+            ->with('success', 'Petugas berhasil ditambahkan!');
+    }
+    public function destroy($id)
+    {
+        $petugas = Petugas::findOrFail($id);
+        $petugas->delete();
+
+        return redirect()->route('manage.petugas')
+            ->with('success', 'Petugas berhasil dihapus!');
+    }
+    public function edit($id)
+    {
+        $petugas = Petugas::findOrFail($id);
+        return view('dashboard.manage-petugas.edit', compact('petugas'));
+    }
+    public function update(Request $request, $id)
+    {
+        $petugas = Petugas::findOrFail($id);
+
+        $request->validate([
+            'nama'    => 'required|string|max:255',
+            'email'   => 'required|email|unique:petugas,email,' . $petugas->id,
+            'nip'     => 'required|string|max:20|unique:petugas,nip,' . $petugas->id,
+            'jabatan' => 'required|string|max:100',
+            'role'    => 'required|string|max:50',
+        ]);
+
+        $petugas->update($request->all());
+
+        return redirect()->route('manage.petugas')
+            ->with('success', 'Petugas berhasil diperbarui!');
     }
 }
