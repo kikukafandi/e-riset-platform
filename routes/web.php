@@ -58,9 +58,7 @@ Route::middleware(['CekLogin:web'])->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['CekLogin:petugas'])->group(function () {
-    Route::get('/dashboard-petugas', function () {
-        return view('dashboard.petugas'); // nanti bikin view dashboard khusus petugas
-    })->name('dashboard.petugas');
+    Route::get('/dashboard-petugas', [DashboardController::class, 'dashboardPetugas'])->name('dashboard.petugas');
 
     Route::get('/manage-petugas', [PetugasController::class, 'index'])->name('manage.petugas');
     Route::get('/manage-petugas/create', [PetugasController::class, 'create'])->name('manage.petugas.create');
@@ -73,4 +71,7 @@ Route::middleware(['CekLogin:petugas'])->group(function () {
     Route::get('/petugas/permohonan/pending', [DokumenPermohonanController::class, 'pending'])->name('permohonan.pending');
     Route::get('/petugas/permohonan/disetujui', [DokumenPermohonanController::class, 'disetujui'])->name('permohonan.disetujui');
     Route::get('/petugas/permohonan/ditolak', [DokumenPermohonanController::class, 'ditolak'])->name('permohonan.ditolak');
+
+    Route::put('/petugas/permohonan/{id}/status', [DokumenPermohonanController::class, 'updateStatus'])->name('permohonan.updateStatus');
+    Route::get('/dokumen/{id}', [DokumenPermohonanController::class, 'show'])->name('dokumen.show');
 });

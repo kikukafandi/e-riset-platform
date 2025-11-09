@@ -1,6 +1,13 @@
 <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
     <!-- Navbar Brand-->
-    <a class="navbar-brand ps-3" href="index.html">Start Bootstrap</a>
+    @if (Auth::guard('web')->check())
+        <a class="navbar-brand ps-3" href="{{ route('dashboardPage') }}">E-Riset Platform</a>
+    @elseif (Auth::guard('petugas')->check())
+        <a class="navbar-brand ps-3" href="{{ route('dashboard.petugas') }}">E-Riset Platform</a>
+    @else
+        <a class="navbar-brand ps-3" href="#">E-Riset Platform</a>
+    @endif
+
     <!-- Sidebar Toggle-->
     <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i
             class="fas fa-bars"></i></button>

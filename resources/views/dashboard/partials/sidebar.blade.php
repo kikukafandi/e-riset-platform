@@ -75,7 +75,11 @@
 
         <div class="sb-sidenav-footer">
             <div class="small">Logged in as:</div>
-            Start Bootstrap
+            @if (Auth::guard('web')->check())
+                {{ Auth::guard('web')->user()->nama_lengkap }}
+            @elseif (Auth::guard('petugas')->check())
+                {{ Auth::guard('petugas')->user()->nama }}
+            @endif
         </div>
     </nav>
 </div>

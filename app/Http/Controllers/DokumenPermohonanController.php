@@ -88,13 +88,49 @@ class DokumenPermohonanController extends Controller
         // Logika untuk mengambil data permohonan yang ditolak
         return view('dashboard.manage-petugas.ditolak');
     }
+
+    public function updateStatus(Request $request, $id)
+    {
+        try {
+            $permohonan = DokumenPermohonan::findOrFail($id);
+            $permohonan->status = $request->status;
+            $permohonan->save();
+
+            return response()->json(['success' => true, 'status' => $permohonan->status], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     /**
      * Display the specified resource.
      */
-    public function show(DokumenPermohonan $dokumenPermohonan)
+    public function show($id)
     {
-        //
+        $dokumen = DokumenPermohonan::findOrFail($id);
+
+        // Jika login via web (user)
+        if (auth('web')->check()) {
+            $user = auth('web')->user();
+
+            // hanya pemilik dokumen yang bisa lihat
+            if ($dokumen->user_id !== $user->id) {
+                abort(403, 'Anda tidak memiliki akses ke dokumen ini.');
+            }
+        }
+
+        // Jika login via petugas, biarkan bisa lihat semuanya
+        if (auth('petugas')->check()) {
+            $petugas = auth('petugas')->user();
+            // bisa tambahkan logika tambahan kalau mau
+        }
+
+        return view('dashboard.manage-petugas.show', compact('dokumen'));
     }
+
 
     /**
      * Show the form for editing the specified resource.
