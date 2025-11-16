@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\DokumenPermohonan;
 use Illuminate\Http\Request;
+use App\Models\TopikRiset;
 
 class DashboardController extends Controller
 {
@@ -16,7 +17,8 @@ class DashboardController extends Controller
 
     public function create()
     {
-        return view('dashboard.form-permohonan');
+        $topikRiset = TopikRiset::orderBy('nama_topik', 'asc')->get();
+        return view('dashboard.form-permohonan', compact('topikRiset'));
     }
     public function dashboardPetugas()
     {
