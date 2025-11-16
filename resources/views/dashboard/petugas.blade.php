@@ -13,7 +13,7 @@
                     <div class="card bg-primary text-white mb-4">
                         <div class="card-body">
                             Total Permohonan
-                            <h4>{{ $total }}</h4>
+                            <h4 id="stat-total">{{ $total }}</h4>
                         </div>
                         <div class="card-footer d-flex align-items-center justify-content-between">
                             <span>Lihat Detail</span>
@@ -25,7 +25,7 @@
                     <div class="card bg-warning text-white mb-4">
                         <div class="card-body">
                             Permohonan Pending
-                            <h4>{{ $pending }}</h4>
+                            <h4 id="stat-pending">{{ $pending }}</h4>
                         </div>
                         <div class="card-footer d-flex align-items-center justify-content-between">
                             <span>Lihat Detail</span>
@@ -37,7 +37,7 @@
                     <div class="card bg-success text-white mb-4">
                         <div class="card-body">
                             Permohonan Disetujui
-                            <h4>{{ $disetujui }}</h4>
+                            <h4 id="stat-disetujui">{{ $disetujui }}</h4>
                         </div>
                         <div class="card-footer d-flex align-items-center justify-content-between">
                             <span>Lihat Detail</span>
@@ -49,7 +49,7 @@
                     <div class="card bg-danger text-white mb-4">
                         <div class="card-body">
                             Permohonan Ditolak
-                            <h4>{{ $ditolak }}</h4>
+                            <h4 id="stat-ditolak">{{ $ditolak }}</h4>
                         </div>
                         <div class="card-footer d-flex align-items-center justify-content-between">
                             <span>Lihat Detail</span>
@@ -61,7 +61,7 @@
                     <div class="card bg-secondary text-white mb-4">
                         <div class="card-body">
                             Dokumen Tidak Lengkap
-                            <h4>{{ $dokumenTidakLengkap }}</h4>
+                            <h4 id="stat-dokumenTidakLengkap">{{ $dokumenTidakLengkap }}</h4>
                         </div>
                         <div class="card-footer d-flex align-items-center justify-content-between">
                             <span>Lihat Detail</span>
@@ -152,14 +152,116 @@
     @push('scripts')
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+        {{-- Script untuk DataTable --}}
+        <script>
+            $(document.ready(function() {
+                        $('#datatablesSimple').DataTable({
+                            pageLength: 10,
+                            language: {
+                                search: "Cari:",
+                                lengthMenu: "Tampilkan _MENU_ data per halaman",
+                                info: "Menampilkan _START_ - _END_ dari _TOTAL_ data",
+                                paginate: {
+                                    first: "Pertama",
+                                    last: "Terakhir",
+                                    next: "→",
+                                    previous: "←"
+                                }
+                            }
+                        });
+                    });
+        </script>
+
+        {{-- Script untuk Update Status dan Chart --}}
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                const dropdowns = document.querySelectorAll('.status-dropdown');
+                const ctx = document.getElementById('permohonanChart');
+                if (!ctx) return;
 
-                dropdowns.forEach(dropdown => {
-                    dropdown.addEventListener('change', async function() {
-                        const id = this.dataset.id;
-                        const newStatus = this.value;
+                // Variabel untuk menyimpan object chart
+                let permohonanChart;
+
+                // == FUNGSI UNTUK UPDATE STATISTIK (KARTU & CHART) ==
+                async function updateStatistikData() {
+                    try {
+                        const res = await fetch('{{ route('petugas.statistik') }}');
+                        if (!res.ok) throw new Error('Gagal mengambil data statistik');
+
+                        const data = await res.json();
+
+                        // 1. Update Kartu Statistik
+                        document.getElementById('stat-total').textContent = data.total;
+                        document.getElementById('stat-pending').textContent = data.pending;
+                        document.getElementById('stat-disetujui').textContent = data.disetujui;
+                        document.getElementById('stat-ditolak').textContent = data.ditolak;
+                        document.getElementById('stat-dokumenTidakLengkap').textContent = data.dokumenTidakLengkap;
+
+                        // 2. Siapkan data baru untuk chart
+                        const newData = [
+                            data.total,
+                            data.pending,
+                            data.disetujui,
+                            data.ditolak,
+                            data.dokumenTidakLengkap
+                        ];
+
+                        // 3. Update Chart
+                        if (permohonanChart) {
+                            permohonanChart.data.datasets[0].data = newData;
+                            permohonanChart.update();
+                        }
+
+                    } catch (err) {
+                        console.error('Gagal update statistik:', err);
+                    }
+                }
+
+                // == INISIALISASI CHART AWAL ==
+                // Ambil data awal dari Blade untuk render pertama kali
+                const initialData = [
+                    {{ $total }},
+                    {{ $pending }},
+                    {{ $disetujui }},
+                    {{ $ditolak }},
+                    {{ $dokumenTidakLengkap }}
+                ];
+
+                // Buat chart-nya dan simpan ke variabel
+                permohonanChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Total', 'Pending', 'Disetujui', 'Ditolak', 'Dokumen Tidak Lengkap'],
+                        datasets: [{
+                            label: 'Jumlah Permohonan',
+                            data: initialData,
+                            backgroundColor: ['#007bff', '#ffc107', '#28a745', '#dc3545',
+                                '#6c757d'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'bottom'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Distribusi Status Permohonan'
+                            }
+                        },
+                        animation: {
+                            duration: 300 // Animasi update
+                        }
+                    }
+                });
+
+                // == EVENT LISTENER UNTUK GANTI STATUS ==
+                document.addEventListener('change', async function(e) {
+                    if (e.target.classList.contains('status-dropdown')) {
+                        const id = e.target.dataset.id;
+                        const newStatus = e.target.value;
 
                         try {
                             const res = await fetch(`/petugas/permohonan/${id}/status`, {
@@ -176,25 +278,29 @@
                             const data = await res.json();
 
                             if (res.ok && data.success) {
-                                // Ubah warna dropdown
-                                this.classList.remove('bg-warning', 'bg-success', 'bg-danger',
+                                // Atur ulang kelas warna pada <select>
+                                e.target.classList.remove('bg-warning', 'bg-success', 'bg-danger',
                                     'bg-secondary', 'text-dark', 'text-white');
-                                if (newStatus === 'diproses') this.classList.add('bg-warning',
-                                    'text-dark');
-                                else if (newStatus === 'diterima') this.classList.add('bg-success',
-                                    'text-white');
-                                else if (newStatus === 'ditolak') this.classList.add('bg-danger',
-                                    'text-white');
-                                else this.classList.add('bg-secondary', 'text-white');
+                                if (newStatus === 'diproses') e.target.classList.add(
+                                    'bg-warning', 'text-dark');
+                                else if (newStatus === 'diterima') e.target.classList.add(
+                                    'bg-success', 'text-white');
+                                else if (newStatus === 'ditolak') e.target.classList.add(
+                                    'bg-danger', 'text-white');
+                                else e.target.classList.add('bg-secondary', 'text-white');
 
-                                // Swal success
                                 Swal.fire({
                                     icon: 'success',
                                     title: 'Berhasil!',
                                     text: 'Status permohonan berhasil diperbarui.',
                                     showConfirmButton: false,
-                                    timer: 1800
+                                    timer: 1500
                                 });
+
+                                // == INI BAGIAN PENTING ==
+                                // Panggil fungsi update statistik SEKARANG JUGA
+                                await updateStatistikData();
+
                             } else {
                                 Swal.fire({
                                     icon: 'error',
@@ -212,61 +318,12 @@
                                 showConfirmButton: true
                             });
                         }
-                    });
-                });
-            });
-        </script>
-
-        <script>
-            $(document).ready(function() {
-                $('#datatablesSimple').DataTable({
-                    pageLength: 10,
-                    language: {
-                        search: "Cari:",
-                        lengthMenu: "Tampilkan _MENU_ data per halaman",
-                        info: "Menampilkan _START_ - _END_ dari _TOTAL_ data",
-                        paginate: {
-                            first: "Pertama",
-                            last: "Terakhir",
-                            next: "→",
-                            previous: "←"
-                        }
                     }
                 });
-            });
-        </script>
 
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const ctx = document.getElementById('permohonanChart');
-                if (!ctx) return;
-
-                new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: ['Total', 'Pending', 'Disetujui', 'Ditolak', 'Dokumen Tidak Lengkap'],
-                        datasets: [{
-                            label: 'Jumlah Permohonan', 
-                            data: [{{ $total }}, {{ $pending }}, {{ $disetujui }},
-                                {{ $ditolak }}, {{ $dokumenTidakLengkap }}
-                            ],
-                            backgroundColor: ['#007bff', '#ffc107', '#28a745', '#dc3545', '#6c757d'],
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        plugins: {
-                            legend: {
-                                display: true, // ubah ke true kalau mau tampil
-                                position: 'bottom'
-                            },
-                            title: {
-                                display: true,
-                                text: 'Distribusi Status Permohonan'
-                            }
-                        }
-                    }
-                });
+                // (Opsional) Anda tetap bisa menggunakan polling jika ingin data
+                // tetap sinkron jika ada petugas lain yang mengubah data.
+                setInterval(updateStatistikData, 10000); // Update setiap 10 detik
             });
         </script>
     @endpush

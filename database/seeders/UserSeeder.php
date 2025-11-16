@@ -23,7 +23,7 @@ class UserSeeder extends Seeder
                 'kampus' => 'Politeknik Negeri Bandung',
                 'jurusan' => 'Teknik Informatika',
                 'nim' => '220101001',
-                'jenjang' => 'S1/D4',
+                'jenjang' => 'S1',
             ],
             [
                 'nama_lengkap' => 'Rina Kusuma',
@@ -47,7 +47,7 @@ class UserSeeder extends Seeder
                 'kampus' => 'Politeknik Negeri Semarang',
                 'jurusan' => 'Teknik Elektro',
                 'nim' => '220104004',
-                'jenjang' => 'S1/D4',
+                'jenjang' => 'S1',
             ],
             [
                 'nama_lengkap' => 'Agus Saputra',

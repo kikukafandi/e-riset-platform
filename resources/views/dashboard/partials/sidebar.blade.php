@@ -60,7 +60,7 @@
                         <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
                         Dashboard
                     </a>
-                    <a class="nav-link" href="{{ route('dokumen.create') }}">
+                    <a class="nav-link" href="{{ route('dashboardPengajuan') }}">
                         <div class="sb-nav-link-icon"><i class="fas fa-upload"></i></div>
                         Ajukan Dokumen Riset
                     </a>

@@ -135,6 +135,13 @@ class DokumenPermohonanController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
+
+    public function status()
+    {
+        $permohonans = DokumenPermohonan::with('user')->latest()->paginate(10);
+        
+        return view('dashboard.dokumen-status', compact('permohonans'));
+    }
     public function edit(DokumenPermohonan $dokumenPermohonan)
     {
         //

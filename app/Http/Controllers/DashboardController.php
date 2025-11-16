@@ -30,4 +30,21 @@ class DashboardController extends Controller
         $dokumenTidakLengkap = DokumenPermohonan::where('status', 'dokumen_tidak_lengkap')->count();
         return view('dashboard.petugas', compact('permohonans', 'total', 'pending', 'disetujui', 'ditolak', 'dokumenTidakLengkap'));
     }
+    public function getStatistikPermohonan()
+    {
+        $total = (int) DokumenPermohonan::count();
+        $pending = (int) DokumenPermohonan::where('status', 'diproses')->count();
+        $disetujui = (int) DokumenPermohonan::where('status', 'diterima')->count();
+        $ditolak = (int) DokumenPermohonan::where('status', 'ditolak')->count();
+        $dokumenTidakLengkap = (int) DokumenPermohonan::where('status', 'dokumen_tidak_lengkap')->count();
+
+        // Pastikan key-nya sama dengan yang dicari di JavaScript
+        return response()->json([
+            'total' => $total,
+            'pending' => $pending,
+            'disetujui' => $disetujui,
+            'ditolak' => $ditolak,
+            'dokumenTidakLengkap' => $dokumenTidakLengkap
+        ]);
+    }
 }

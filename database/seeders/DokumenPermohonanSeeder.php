@@ -14,6 +14,7 @@ class DokumenPermohonanSeeder extends Seeder
     public function run(): void
     {
         DokumenPermohonan::create([
+            'topik_tujuan_riset' => 'Efisiensi Energi pada IoT',
             'judul_riset' => 'Analisis Efisiensi Energi pada Sistem IoT',
             'proposal' => 'Penelitian ini bertujuan untuk ...',
             'user_id' => 1,

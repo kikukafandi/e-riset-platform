@@ -74,4 +74,7 @@ Route::middleware(['CekLogin:petugas'])->group(function () {
 
     Route::put('/petugas/permohonan/{id}/status', [DokumenPermohonanController::class, 'updateStatus'])->name('permohonan.updateStatus');
     Route::get('/dokumen/{id}', [DokumenPermohonanController::class, 'show'])->name('dokumen.show');
+    Route::get('/petugas/statistik-permohonan', [DashboardController::class, 'getStatistikPermohonan'])->name('petugas.statistik');
+
+
 });

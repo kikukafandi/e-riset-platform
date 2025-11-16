@@ -29,6 +29,20 @@
 
                     <form action="{{ route('dokumen.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
+                        <div class="mb-3">
+                            <label for="topik" class="form-label">Topik</label>
+                            <select name="topik" id="topik" class="form-select" required>
+                                <option value="" disabled selected>Pilih Topik</option>
+                                <option value="Kesehatan">Kesehatan</option>
+                                <option value="Pendidikan">Pendidikan</option>
+                                <option value="Ekonomi">Ekonomi</option>
+                                <option value="Sosial">Sosial</option>
+                                <option value="Lingkungan">Lingkungan</option>
+                                <option value="Teknologi">Teknologi</option>
+                                <option value="Budaya">Budaya</option>
+                                <option value="Lainnya">Lainnya</option>
+                            </select>
+                        </div>
 
                         <div class="mb-3">
                             <label for="judul_riset" class="form-label">Judul Riset</label>

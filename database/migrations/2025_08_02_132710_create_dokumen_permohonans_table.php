@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('judul_riset');
             $table->text('proposal');
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->string('topik_tujuan_riset');
             $table->text('unit_kerja_lokasi_riset');
             $table->text('jenis_permohonan_data');
             $table->text('data_statistik_yang_diminta')->nullable();
