@@ -22,6 +22,21 @@
                             <div class="sb-nav-link-icon"><i class="fas fa-bookmark"></i></div>
                             Kelola Topik Riset
                         </a>
+
+                        <a class="nav-link" href="{{ route('manage.kantor.index') }}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-building"></i></div>
+                            Kelola Kantor Bea Cukai
+                        </a>
+
+                        <a class="nav-link" href="{{ route('statistics.dashboard') }}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-chart-bar"></i></div>
+                            Dashboard Statistik
+                        </a>
+
+                        <a class="nav-link" href="{{ route('research.completion.dashboard') }}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-tasks"></i></div>
+                            Monitor Penyelesaian Riset
+                        </a>
                     @endif
 
                     {{-- Role pelaksana --}}

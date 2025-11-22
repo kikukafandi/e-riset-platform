@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             PetugasSeeder::class,
             DokumenPermohonanSeeder::class,
             LaporanSeeder::class,
+            KantorBeaCukaiSeeder::class,
         ]);
     }
 }

@@ -74,6 +74,14 @@
                             </div>
 
                             <div class="mb-3">
+                                <label for="kantor_tujuan" class="form-label">Kantor Tujuan <span class="text-danger">*</span></label>
+                                <select name="kantor_tujuan" id="kantor_tujuan" class="form-control" required>
+                                    <option value="">-- Pilih Kantor Tujuan --</option>
+                                </select>
+                                <small class="form-text text-muted">Pilih kantor bea cukai tujuan untuk penelitian Anda</small>
+                            </div>
+
+                            <div class="mb-3">
                                 <label for="unit_kerja_lokasi_riset" class="form-label">Unit Kerja / Lokasi Riset</label>
                                 <textarea name="unit_kerja_lokasi_riset" id="unit_kerja_lokasi_riset" class="form-control" rows="2" required></textarea>
                             </div>
@@ -148,6 +156,46 @@
             topikSelect.addEventListener('change', function() {
                 toggleTopikBaru(this.value);
             });
+
+            // Load kantor options
+            loadKantorOptions();
         });
+
+        function loadKantorOptions() {
+            fetch('{{ route("api.kantor.options") }}')
+                .then(response => response.json())
+                .then(data => {
+                    const kantorSelect = document.getElementById('kantor_tujuan');
+                    kantorSelect.innerHTML = '<option value="">-- Pilih Kantor Tujuan --</option>';
+                    
+                    // Group by province
+                    const groupedKantors = {};
+                    data.forEach(kantor => {
+                        if (!groupedKantors[kantor.provinsi]) {
+                            groupedKantors[kantor.provinsi] = [];
+                        }
+                        groupedKantors[kantor.provinsi].push(kantor);
+                    });
+
+                    // Add options grouped by province
+                    Object.keys(groupedKantors).sort().forEach(provinsi => {
+                        const optgroup = document.createElement('optgroup');
+                        optgroup.label = provinsi;
+                        
+                        groupedKantors[provinsi].forEach(kantor => {
+                            const option = document.createElement('option');
+                            option.value = kantor.kode_kantor;
+                            option.textContent = `${kantor.kode_kantor} - ${kantor.nama_kantor}`;
+                            option.selected = '{{ old("kantor_tujuan") }}' === kantor.kode_kantor;
+                            optgroup.appendChild(option);
+                        });
+                        
+                        kantorSelect.appendChild(optgroup);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading kantor options:', error);
+                });
+        }
     </script>
 @endpush

@@ -40,13 +40,40 @@ class DashboardController extends Controller
         $ditolak = (int) DokumenPermohonan::where('status', 'ditolak')->count();
         $dokumenTidakLengkap = (int) DokumenPermohonan::where('status', 'dokumen_tidak_lengkap')->count();
 
+        // Additional statistics for the new features
+        $currentYear = date('Y');
+        
+        // Employee vs Non-employee statistics
+        $pegawaiCount = DokumenPermohonan::whereHas('user', function ($q) {
+            $q->where('kategori', 'nonmahasiswa')->whereNotNull('instansi');
+        })->count();
+        
+        $nonPegawaiCount = DokumenPermohonan::whereHas('user', function ($q) {
+            $q->where('kategori', 'mahasiswa')
+              ->orWhere(function ($subQ) {
+                  $subQ->where('kategori', 'nonmahasiswa')->whereNull('instansi');
+              });
+        })->count();
+
+        // Research completion statistics
+        $overdueCount = DokumenPermohonan::where('status', 'diterima')
+            ->where('status_penelitian', '!=', 'selesai')
+            ->where('deadline_penelitian', '<', now())
+            ->count();
+
+        $completedCount = DokumenPermohonan::where('status_penelitian', 'selesai')->count();
+
         // Pastikan key-nya sama dengan yang dicari di JavaScript
         return response()->json([
             'total' => $total,
             'pending' => $pending,
             'disetujui' => $disetujui,
             'ditolak' => $ditolak,
-            'dokumenTidakLengkap' => $dokumenTidakLengkap
+            'dokumenTidakLengkap' => $dokumenTidakLengkap,
+            'pegawai' => $pegawaiCount,
+            'nonPegawai' => $nonPegawaiCount,
+            'overdue' => $overdueCount,
+            'completed' => $completedCount
         ]);
     }
 }
