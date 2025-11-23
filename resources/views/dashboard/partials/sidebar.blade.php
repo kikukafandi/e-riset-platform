@@ -37,13 +37,31 @@
                             <div class="sb-nav-link-icon"><i class="fas fa-tasks"></i></div>
                             Monitor Penyelesaian Riset
                         </a>
+
+                        <a class="nav-link" href="{{ route('validation.queue') }}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-clipboard-check"></i></div>
+                            Queue Validasi Paper
+                        </a>
+
+                        <a class="nav-link" href="{{ route('verification.queue') }}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-user-tie"></i></div>
+                            Queue Verifikasi Pejabat
+                        </a>
                     @endif
 
-                    {{-- Role pelaksana --}}
+                    {{-- Role super admin --}}
+                    @if (Auth::guard('petugas')->user()->role === 'super_admin')
+                        <a class="nav-link" href="{{ route('validation.queue') }}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-cog"></i></div>
+                            Admin Panel
+                        </a>
+                    @endif
+
+                    {{-- Role pelaksana - Initial document validation --}}
                     @if (Auth::guard('petugas')->user()->role === 'pelaksana')
-                        <a class="nav-link" href="{{ route('dokumen.index') }}">
+                        <a class="nav-link" href="{{ route('validation.queue') }}">
                             <div class="sb-nav-link-icon"><i class="fas fa-file-alt"></i></div>
-                            Verifikasi Dokumen
+                            Validasi Dokumen Awal
                         </a>
                     @endif
 
@@ -51,7 +69,7 @@
                     @if (Auth::guard('petugas')->user()->role === 'eselon_iv')
                         <a class="nav-link" href="{{ route('dokumen.disposisi.iv') }}">
                             <div class="sb-nav-link-icon"><i class="fas fa-share-square"></i></div>
-                            Disposisi ke Eselon III
+                            Review & Disposisi ke Eselon III
                         </a>
                     @endif
 
@@ -59,15 +77,19 @@
                     @if (Auth::guard('petugas')->user()->role === 'eselon_iii')
                         <a class="nav-link" href="{{ route('dokumen.disposisi.iii') }}">
                             <div class="sb-nav-link-icon"><i class="fas fa-share-square"></i></div>
-                            Disposisi ke Eselon II
+                            Review & Disposisi ke Eselon II
                         </a>
                     @endif
 
-                    {{-- Role eselon ii --}}
+                    {{-- Role eselon ii - Highest authority --}}
                     @if (Auth::guard('petugas')->user()->role === 'eselon_ii')
-                        <a class="nav-link" href="{{ route('dokumen.ttd') }}">
+                        <a class="nav-link" href="{{ route('dokumen.disposisi.ii') }}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-stamp"></i></div>
+                            Persetujuan Final
+                        </a>
+                        <a class="nav-link" href="{{ route('verification.queue') }}">
                             <div class="sb-nav-link-icon"><i class="fas fa-signature"></i></div>
-                            Tanda Tangan Dokumen
+                            Verifikasi & Generate Surat
                         </a>
                     @endif
                 @endif
@@ -84,10 +106,14 @@
                         <div class="sb-nav-link-icon"><i class="fas fa-upload"></i></div>
                         Ajukan Dokumen Riset
                     </a>
-                    <a class="nav-link" href="{{ route('dokumen.status') }}">
+                    <a class="nav-link" href="{{ route('timeline.index') }}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-road"></i></div>
+                        Timeline Progress
+                    </a>
+                    {{-- <a class="nav-link" href="{{ route('dokumen.status') }}">
                         <div class="sb-nav-link-icon"><i class="fas fa-list"></i></div>
                         Status Pengajuan
-                    </a>
+                    </a> --}}
                 @endif
 
             </div>

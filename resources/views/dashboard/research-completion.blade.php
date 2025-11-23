@@ -71,20 +71,20 @@
     <!-- Tabs -->
     <ul class="nav nav-tabs" id="researchTabs" role="tablist">
         <li class="nav-item" role="presentation">
-            <a class="nav-link active" id="overdue-tab" data-toggle="tab" href="#overdue" role="tab">
+            <button class="nav-link active" id="overdue-tab" data-bs-toggle="tab" data-bs-target="#overdue" type="button" role="tab" aria-controls="overdue" aria-selected="true">
                 <i class="fas fa-exclamation-triangle text-danger"></i> Riset Terlambat
-            </a>
+            </button>
         </li>
         <li class="nav-item" role="presentation">
-            <a class="nav-link" id="completed-tab" data-toggle="tab" href="#completed" role="tab">
+            <button class="nav-link" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed" type="button" role="tab" aria-controls="completed" aria-selected="false">
                 <i class="fas fa-check-circle text-success"></i> Riset Selesai
-            </a>
+            </button>
         </li>
     </ul>
 
     <div class="tab-content" id="researchTabsContent">
         <!-- Overdue Research Tab -->
-        <div class="tab-pane fade show active" id="overdue" role="tabpanel">
+        <div class="tab-pane fade show active" id="overdue" role="tabpanel" aria-labelledby="overdue-tab">
             <div class="card mt-3">
                 <div class="card-header">
                     <h5 class="mb-0">Penelitian yang Terlambat</h5>
@@ -171,7 +171,7 @@
         </div>
 
         <!-- Completed Research Tab -->
-        <div class="tab-pane fade" id="completed" role="tabpanel">
+        <div class="tab-pane fade" id="completed" role="tabpanel" aria-labelledby="completed-tab">
             <div class="card mt-3">
                 <div class="card-header">
                     <h5 class="mb-0">Penelitian yang Telah Selesai</h5>

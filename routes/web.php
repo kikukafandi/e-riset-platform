@@ -7,6 +7,7 @@ use App\Http\Controllers\PetugasController;
 use App\Http\Controllers\TopikRisetController;
 use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\KantorBeaCukaiController;
+use App\Http\Controllers\TimelineController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -57,6 +58,10 @@ Route::middleware(['CekLogin:web'])->group(function () {
     // Research completion features
     Route::post('/dokumen/{id}/complete-research', [DokumenPermohonanController::class, 'updateResearchCompletion'])->name('dokumen.complete.research');
     Route::get('/check-eligibility/{userId}', [DokumenPermohonanController::class, 'checkResearcherEligibility'])->name('check.eligibility');
+
+    // Timeline and Paper Submission Routes
+    Route::get('/timeline', [TimelineController::class, 'index'])->name('timeline.index');
+    Route::post('/timeline/submit-paper/{id}', [TimelineController::class, 'submitPaper'])->name('timeline.submit.paper');
 });
 
 /*
@@ -113,6 +118,22 @@ Route::middleware(['CekLogin:petugas'])->group(function () {
     
     // Update overdue research (can be scheduled as cron job)
     Route::post('/update-overdue-research', [StatisticsController::class, 'updateOverdueResearch'])->name('update.overdue.research');
+
+    // Paper Validation and Verification Routes
+    Route::get('/validation-queue', [TimelineController::class, 'validationQueue'])->name('validation.queue');
+    Route::post('/timeline/validate-paper/{id}', [TimelineController::class, 'validatePaper'])->name('timeline.validate.paper');
+    
+    Route::get('/verification-queue', [TimelineController::class, 'verificationQueue'])->name('verification.queue');
+    Route::post('/timeline/official-verification/{id}', [TimelineController::class, 'officialVerification'])->name('timeline.official.verification');
+    
+    // Letter Generation Routes
+    Route::get('/timeline/generate-letter/{id}', [TimelineController::class, 'generateApprovalLetter'])->name('timeline.generate.letter');
+
+    // Disposisi Routes (Document Flow Management)
+    Route::get('/dokumen/disposisi-iv', [DokumenPermohonanController::class, 'disposisiEselonIV'])->name('dokumen.disposisi.iv');
+    Route::get('/dokumen/disposisi-iii', [DokumenPermohonanController::class, 'disposisiEselonIII'])->name('dokumen.disposisi.iii');
+    Route::get('/dokumen/disposisi-ii', [DokumenPermohonanController::class, 'disposisiEselonII'])->name('dokumen.disposisi.ii');
+    Route::post('/dokumen/disposisi/{id}/forward', [DokumenPermohonanController::class, 'forwardDocument'])->name('dokumen.disposisi.forward');
 
     // API endpoints
     Route::get('/api/kantor-options', [KantorBeaCukaiController::class, 'getKantorOptions'])->name('api.kantor.options');

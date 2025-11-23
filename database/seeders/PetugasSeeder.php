@@ -15,12 +15,12 @@ class PetugasSeeder extends Seeder
     public function run(): void
     {
         Petugas::create([
-            'nama' => 'Admin Super',
+            'nama' => 'Super Admin',
             'jabatan' => 'Administrator',
             'nip' => '1000000001',
             'email' => 'super@domain.com',
             'password' => Hash::make('password'),
-            'role' => 'super_user',
+            'role' => 'super_admin',
         ]);
 
         Petugas::create([

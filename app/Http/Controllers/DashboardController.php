@@ -10,15 +10,23 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $permohonans = DokumenPermohonan::with('user')->latest()->get();
+
+        $permohonans = DokumenPermohonan::with('user')
+            ->where('user_id', auth()->id()) 
+            ->latest()
+            ->get();
         return view('dashboard.index', compact('permohonans'));
     }
 
 
     public function create()
     {
+        $kantorCukai = \App\Models\KantorBeaCukai::where('is_active', true)
+            ->orderBy('provinsi', 'asc')
+            ->orderBy('nama_kantor', 'asc')
+            ->get();
         $topikRiset = TopikRiset::orderBy('nama_topik', 'asc')->get();
-        return view('dashboard.form-permohonan', compact('topikRiset'));
+        return view('dashboard.form-permohonan', compact('topikRiset', 'kantorCukai'));
     }
     public function dashboardPetugas()
     {
@@ -42,17 +50,17 @@ class DashboardController extends Controller
 
         // Additional statistics for the new features
         $currentYear = date('Y');
-        
+
         // Employee vs Non-employee statistics
         $pegawaiCount = DokumenPermohonan::whereHas('user', function ($q) {
             $q->where('kategori', 'nonmahasiswa')->whereNotNull('instansi');
         })->count();
-        
+
         $nonPegawaiCount = DokumenPermohonan::whereHas('user', function ($q) {
             $q->where('kategori', 'mahasiswa')
-              ->orWhere(function ($subQ) {
-                  $subQ->where('kategori', 'nonmahasiswa')->whereNull('instansi');
-              });
+                ->orWhere(function ($subQ) {
+                    $subQ->where('kategori', 'nonmahasiswa')->whereNull('instansi');
+                });
         })->count();
 
         // Research completion statistics

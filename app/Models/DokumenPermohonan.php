@@ -15,7 +15,16 @@ class DokumenPermohonan extends Model
     protected $casts = [
         'tanggal_persetujuan' => 'date',
         'deadline_penelitian' => 'date',
-        'dapat_perijinan_lagi' => 'boolean'
+        'dapat_perijinan_lagi' => 'boolean',
+        'tanggal_draft' => 'datetime',
+        'tanggal_submit' => 'datetime',
+        'tanggal_validasi_admin' => 'datetime',
+        'tanggal_verifikasi_pejabat' => 'datetime',
+        'tanggal_mulai_riset' => 'datetime',
+        'paper_submitted_at' => 'datetime',
+        'paper_validated_at' => 'datetime',
+        'admin_validated_at' => 'datetime',
+        'letter_generated_at' => 'datetime'
     ];
 
     public function user(){
@@ -64,5 +73,50 @@ class DokumenPermohonan extends Model
                 });
             }
         });
+    }
+
+    // Get timeline status for display
+    public function getTimelineStatus()
+    {
+        if ($this->status_penelitian === 'selesai') {
+            return 'completed';
+        } elseif ($this->tanggal_mulai_riset) {
+            return 'research_period';
+        } elseif ($this->status === 'diterima') {
+            return 'approved';
+        } elseif ($this->tanggal_submit) {
+            return 'processing';
+        } else {
+            return 'draft';
+        }
+    }
+
+    // Get timeline percentage for progress bar
+    public function getTimelinePercentage()
+    {
+        $status = $this->getTimelineStatus();
+        return match($status) {
+            'draft' => 20,
+            'processing' => 40,
+            'approved' => 60,
+            'research_period' => 80,
+            'completed' => 100,
+            default => 0
+        };
+    }
+
+    // Check if paper can be submitted
+    public function canSubmitPaper()
+    {
+        return $this->status === 'diterima' && 
+               $this->status_penelitian !== 'selesai' && 
+               !$this->paper_file;
+    }
+
+    // Check if admin can validate
+    public function canAdminValidate()
+    {
+        return $this->paper_file && 
+               $this->paper_validation_status === 'pending';
     }
 }

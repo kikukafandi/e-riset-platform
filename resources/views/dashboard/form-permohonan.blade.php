@@ -12,6 +12,7 @@
                         {{-- Error Message --}}
                         @if ($errors->any())
                             <div class="alert alert-danger">
+                                <h6><i class="fas fa-exclamation-triangle"></i> Terjadi Kesalahan:</h6>
                                 <ul class="mb-0">
                                     @foreach ($errors->all() as $error)
                                         <li>{{ $error }}</li>
@@ -19,6 +20,14 @@
                                 </ul>
                             </div>
                         @endif
+
+                        {{-- Database Error --}}
+                        @error('database')
+                            <div class="alert alert-danger">
+                                <h6><i class="fas fa-database"></i> Error Database:</h6>
+                                {{ $message }}
+                            </div>
+                        @enderror
 
                         {{-- Success Message --}}
                         @if (session('success'))
@@ -68,15 +77,41 @@
                             </div>
 
                             <div class="mb-3">
-                                <label for="proposal" class="form-label">Proposal (PDF)</label>
+                                <label for="proposal" class="form-label">Proposal (PDF) <span class="text-danger">*</span></label>
                                 <input type="file" name="proposal" id="proposal" class="form-control" accept=".pdf"
                                     required>
+                                <small class="form-text text-muted">
+                                    Upload file proposal dalam format PDF (maksimal 2MB)
+                                </small>
+                                @error('proposal')
+                                    <div class="text-danger small mt-1">{{ $message }}</div>
+                                @enderror
+                                @error('upload')
+                                    <div class="text-danger small mt-1">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <div class="mb-3">
                                 <label for="kantor_tujuan" class="form-label">Kantor Tujuan <span class="text-danger">*</span></label>
                                 <select name="kantor_tujuan" id="kantor_tujuan" class="form-control" required>
                                     <option value="">-- Pilih Kantor Tujuan --</option>
+                                    @if(isset($kantorCukai) && $kantorCukai->count() > 0)
+                                        @php
+                                            $kantorByProvinsi = $kantorCukai->groupBy('provinsi');
+                                        @endphp
+                                        @foreach ($kantorByProvinsi as $provinsi => $kantors)
+                                            <optgroup label="{{ $provinsi }}">
+                                                @foreach ($kantors as $kantor)
+                                                    <option value="{{ $kantor->kode_kantor }}"
+                                                        {{ old('kantor_tujuan') == $kantor->kode_kantor ? 'selected' : '' }}>
+                                                        {{ $kantor->kode_kantor }} - {{ $kantor->nama_kantor }}
+                                                    </option>
+                                                @endforeach
+                                            </optgroup>
+                                        @endforeach
+                                    @else
+                                        <option disabled>Data kantor tidak tersedia</option>
+                                    @endif
                                 </select>
                                 <small class="form-text text-muted">Pilih kantor bea cukai tujuan untuk penelitian Anda</small>
                             </div>
@@ -101,23 +136,40 @@
                                 <label for="kuisioner" class="form-label">Kuisioner (PDF/DOCX)</label>
                                 <input type="file" name="kuisioner" id="kuisioner" class="form-control"
                                     accept=".pdf,.doc,.docx">
+                                <small class="form-text text-muted">Opsional: Upload kuisioner (maksimal 2MB)</small>
+                                @error('kuisioner')
+                                    <div class="text-danger small mt-1">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <div class="mb-3">
                                 <label for="pedoman_wawancara" class="form-label">Pedoman Wawancara (PDF/DOCX)</label>
                                 <input type="file" name="pedoman_wawancara" id="pedoman_wawancara" class="form-control"
                                     accept=".pdf,.doc,.docx">
+                                <small class="form-text text-muted">Opsional: Upload pedoman wawancara (maksimal 2MB)</small>
+                                @error('pedoman_wawancara')
+                                    <div class="text-danger small mt-1">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <div class="mb-3">
                                 <label for="proposal_fgd" class="form-label">Proposal FGD (PDF/DOCX)</label>
                                 <input type="file" name="proposal_fgd" id="proposal_fgd" class="form-control"
                                     accept=".pdf,.doc,.docx">
+                                <small class="form-text text-muted">Opsional: Upload proposal FGD (maksimal 2MB)</small>
+                                @error('proposal_fgd')
+                                    <div class="text-danger small mt-1">{{ $message }}</div>
+                                @enderror
                             </div>
 
 
                             <div class="d-flex justify-content-end">
-                                <button type="submit" class="btn btn-success">Kirim Permohonan</button>
+                                <button type="submit" class="btn btn-success" id="submitBtn">
+                                    <span id="submitText">Kirim Permohonan</span>
+                                    <span id="submitSpinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </span>
+                                </button>
                             </div>
                         </form>
                     </div>
@@ -157,45 +209,38 @@
                 toggleTopikBaru(this.value);
             });
 
-            // Load kantor options
-            loadKantorOptions();
-        });
+            // Handle form submission with loading indicator
+            const form = document.querySelector('form');
+            const submitBtn = document.getElementById('submitBtn');
+            const submitText = document.getElementById('submitText');
+            const submitSpinner = document.getElementById('submitSpinner');
 
-        function loadKantorOptions() {
-            fetch('{{ route("api.kantor.options") }}')
-                .then(response => response.json())
-                .then(data => {
-                    const kantorSelect = document.getElementById('kantor_tujuan');
-                    kantorSelect.innerHTML = '<option value="">-- Pilih Kantor Tujuan --</option>';
+            form.addEventListener('submit', function(e) {
+                // Validate file size before submission
+                const proposalFile = document.getElementById('proposal').files[0];
+                if (proposalFile && proposalFile.size > 2 * 1024 * 1024) {
+                    e.preventDefault();
+                    alert('Ukuran file proposal tidak boleh lebih dari 2MB');
+                    return;
+                }
+
+                // Show loading state
+                submitBtn.disabled = true;
+                submitText.textContent = 'Mengupload...';
+                submitSpinner.classList.remove('d-none');
+            });
+
+            // Add file size validation for all file inputs
+            document.querySelectorAll('input[type="file"]').forEach(input => {
+                input.addEventListener('change', function() {
+                    const maxSize = 2 * 1024 * 1024; // 2MB for all files
                     
-                    // Group by province
-                    const groupedKantors = {};
-                    data.forEach(kantor => {
-                        if (!groupedKantors[kantor.provinsi]) {
-                            groupedKantors[kantor.provinsi] = [];
-                        }
-                        groupedKantors[kantor.provinsi].push(kantor);
-                    });
-
-                    // Add options grouped by province
-                    Object.keys(groupedKantors).sort().forEach(provinsi => {
-                        const optgroup = document.createElement('optgroup');
-                        optgroup.label = provinsi;
-                        
-                        groupedKantors[provinsi].forEach(kantor => {
-                            const option = document.createElement('option');
-                            option.value = kantor.kode_kantor;
-                            option.textContent = `${kantor.kode_kantor} - ${kantor.nama_kantor}`;
-                            option.selected = '{{ old("kantor_tujuan") }}' === kantor.kode_kantor;
-                            optgroup.appendChild(option);
-                        });
-                        
-                        kantorSelect.appendChild(optgroup);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error loading kantor options:', error);
+                    if (this.files[0] && this.files[0].size > maxSize) {
+                        alert(`Ukuran file tidak boleh lebih dari 2MB`);
+                        this.value = '';
+                    }
                 });
-        }
+            });
+        });
     </script>
 @endpush

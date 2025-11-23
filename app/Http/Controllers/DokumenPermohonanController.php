@@ -7,6 +7,8 @@ use App\Models\TopikRiset;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class DokumenPermohonanController extends Controller
 {
@@ -34,8 +36,8 @@ class DokumenPermohonanController extends Controller
         // 1. Tentukan Aturan Validasi
         $rules = [
             'judul_riset'               => 'required|string|max:255',
-            'proposal'                  => 'required|file|mimes:pdf|max:2048',
-            'topik_tujuan_riset'        => 'required|string|max:255', // Ini ditambahkan kembali
+            'proposal'                  => 'required|file|mimes:pdf|max:2048', // 2MB to match PHP config
+            'topik_tujuan_riset'        => 'required|string|max:255',
             'topik_tujuan_riset_baru'   => [
                 'nullable',
                 'string',
@@ -46,14 +48,20 @@ class DokumenPermohonanController extends Controller
             'unit_kerja_lokasi_riset'   => 'required|string',
             'jenis_permohonan_data'     => 'required|string',
             'data_statistik_yang_diminta' => 'nullable|string',
-            'kuisioner'                 => 'nullable|file|mimes:pdf,doc,docx|max:2048',
-            'pedoman_wawancara'         => 'nullable|file|mimes:pdf,doc,docx|max:2048',
-            'proposal_fgd'              => 'nullable|file|mimes:pdf,doc,docx|max:2048',
+            'kuisioner'                 => 'nullable|file|mimes:pdf,doc,docx|max:2048', // 2MB
+            'pedoman_wawancara'         => 'nullable|file|mimes:pdf,doc,docx|max:2048', // 2MB
+            'proposal_fgd'              => 'nullable|file|mimes:pdf,doc,docx|max:2048', // 2MB
             'kantor_tujuan'             => 'required|string|exists:kantor_bea_cukai,kode_kantor',
         ];
 
         // 2. Tentukan Pesan Error Kustom
         $messages = [
+            'proposal.required' => 'File proposal wajib diupload.',
+            'proposal.file' => 'Proposal harus berupa file.',
+            'proposal.mimes' => 'Proposal harus berformat PDF.',
+            'proposal.max' => 'Ukuran file proposal maksimal 2MB.',
+            'kantor_tujuan.required' => 'Kantor tujuan wajib dipilih.',
+            'kantor_tujuan.exists' => 'Kantor tujuan yang dipilih tidak valid.',
             'topik_tujuan_riset_baru.required_if' => 'Nama topik baru wajib diisi jika Anda memilih "Lainnya".',
             'topik_tujuan_riset_baru.unique' => 'Nama topik baru ini sudah ada, silakan pilih dari daftar.',
         ];
@@ -61,11 +69,37 @@ class DokumenPermohonanController extends Controller
         // 3. Jalankan Validasi
         $validated = $request->validate($rules, $messages);
 
-        // 4. Proses Upload File (Logika darimu sudah bagus)
-        $proposalPath = $request->file('proposal')->store('dokumen/proposal', 'public');
-        $kuisionerPath = $request->file('kuisioner') ? $request->file('kuisioner')->store('dokumen/kuisioner', 'public') : null;
-        $wawancaraPath = $request->file('pedoman_wawancara') ? $request->file('pedoman_wawancara')->store('dokumen/wawancara', 'public') : null;
-        $fgdPath = $request->file('proposal_fgd') ? $request->file('proposal_fgd')->store('dokumen/fgd', 'public') : null;
+        try {
+            // 4. Proses Upload File dengan error handling
+            if (!$request->hasFile('proposal')) {
+                return back()->withErrors(['proposal' => 'File proposal tidak ditemukan.'])->withInput();
+            }
+
+            if (!$request->file('proposal')->isValid()) {
+                return back()->withErrors(['proposal' => 'File proposal tidak valid atau rusak.'])->withInput();
+            }
+
+            // Create storage directories if they don't exist
+            Storage::disk('public')->makeDirectory('dokumen/proposal');
+            Storage::disk('public')->makeDirectory('dokumen/kuisioner');
+            Storage::disk('public')->makeDirectory('dokumen/wawancara');
+            Storage::disk('public')->makeDirectory('dokumen/fgd');
+
+            $proposalPath = $request->file('proposal')->store('dokumen/proposal', 'public');
+            if (!$proposalPath) {
+                return back()->withErrors(['proposal' => 'Gagal mengupload file proposal.'])->withInput();
+            }
+
+            $kuisionerPath = $request->hasFile('kuisioner') && $request->file('kuisioner')->isValid() ? 
+                $request->file('kuisioner')->store('dokumen/kuisioner', 'public') : null;
+            $wawancaraPath = $request->hasFile('pedoman_wawancara') && $request->file('pedoman_wawancara')->isValid() ? 
+                $request->file('pedoman_wawancara')->store('dokumen/wawancara', 'public') : null;
+            $fgdPath = $request->hasFile('proposal_fgd') && $request->file('proposal_fgd')->isValid() ? 
+                $request->file('proposal_fgd')->store('dokumen/fgd', 'public') : null;
+        } catch (\Exception $e) {
+            Log::error('File upload error: ' . $e->getMessage());
+            return back()->withErrors(['upload' => 'Terjadi kesalahan saat mengupload file: ' . $e->getMessage()])->withInput();
+        }
 
         // 5. Proses Logika Topik Riset
         $namaTopikFinal = '';
@@ -96,11 +130,26 @@ class DokumenPermohonanController extends Controller
         // Hapus field sementara
         unset($dataToSave['topik_tujuan_riset_baru']);
 
-        // 7. Simpan ke Database
-        DokumenPermohonan::create($dataToSave);
+        try {
+            // 7. Simpan ke Database
+            $dokumen = DokumenPermohonan::create($dataToSave);
+            
+            // Log successful creation
+            Log::info('Dokumen permohonan berhasil dibuat', ['dokumen_id' => $dokumen->id, 'user_id' => Auth::id()]);
 
-        // 8. Redirect
-        return redirect()->route('dashboardPage')->with('success', 'Permohonan dokumen berhasil dikirim!');
+            // 8. Redirect
+            return redirect()->route('dashboardPage')->with('success', 'Permohonan dokumen berhasil dikirim!');
+        } catch (\Exception $e) {
+            Log::error('Database save error: ' . $e->getMessage());
+            
+            // Delete uploaded files if database save fails
+            if (isset($proposalPath)) Storage::disk('public')->delete($proposalPath);
+            if (isset($kuisionerPath)) Storage::disk('public')->delete($kuisionerPath);
+            if (isset($wawancaraPath)) Storage::disk('public')->delete($wawancaraPath);
+            if (isset($fgdPath)) Storage::disk('public')->delete($fgdPath);
+            
+            return back()->withErrors(['database' => 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage()])->withInput();
+        }
     }
 
     public function total()
@@ -147,7 +196,11 @@ class DokumenPermohonanController extends Controller
 
             $permohonan->save();
 
-            return response()->json(['success' => true, 'status' => $permohonan->status], 200);
+            return response()->json([
+                'success' => true, 
+                'status' => $permohonan->status,
+                'message' => 'Status berhasil diperbarui'
+            ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -213,8 +266,6 @@ class DokumenPermohonanController extends Controller
     {
         //
     }
-
-
 
     /**
      * Update research completion (for researchers)
@@ -287,5 +338,92 @@ class DokumenPermohonanController extends Controller
             ->paginate(20);
 
         return view('dashboard.research-completion', compact('overdueResearch', 'completedResearch'));
+    }
+
+    /**
+     * Disposisi Eselon IV - Documents validated by Pelaksana
+     */
+    public function disposisiEselonIV()
+    {
+        $documents = DokumenPermohonan::with(['user', 'kantorBeaCukai'])
+            ->where('status', 'menunggu_verifikasi')
+            ->where('paper_validation_status', 'valid')
+            ->where('admin_validation_status', 'approved_by_pelaksana')
+            ->paginate(20);
+
+        return view('dashboard.disposisi.eselon-iv', compact('documents'));
+    }
+
+    /**
+     * Disposisi Eselon III - Documents forwarded from Eselon IV
+     */
+    public function disposisiEselonIII()
+    {
+        $documents = DokumenPermohonan::with(['user', 'kantorBeaCukai'])
+            ->where('status', 'menunggu_verifikasi')
+            ->where('admin_validation_status', 'forwarded_to_iii')
+            ->paginate(20);
+
+        return view('dashboard.disposisi.eselon-iii', compact('documents'));
+    }
+
+    /**
+     * Disposisi Eselon II - Documents forwarded from Eselon III for final approval
+     */
+    public function disposisiEselonII()
+    {
+        $documents = DokumenPermohonan::with(['user', 'kantorBeaCukai'])
+            ->where('status', 'menunggu_verifikasi')
+            ->where('admin_validation_status', 'forwarded_to_ii')
+            ->paginate(20);
+
+        return view('dashboard.disposisi.eselon-ii', compact('documents'));
+    }
+
+    /**
+     * Forward document to next level
+     */
+    public function forwardDocument(Request $request, $id)
+    {
+        $request->validate([
+            'forward_to' => 'required|in:eselon_iii,eselon_ii,final_approval',
+            'notes' => 'nullable|string|max:500'
+        ]);
+
+        $document = DokumenPermohonan::findOrFail($id);
+        
+        switch($request->forward_to) {
+            case 'approve_pelaksana':
+                $document->admin_validation_status = 'approved_by_pelaksana';
+                break;
+            case 'eselon_iii':
+                $document->admin_validation_status = 'forwarded_to_iii';
+                break;
+            case 'eselon_ii':
+                $document->admin_validation_status = 'forwarded_to_ii';
+                break;
+            case 'final_approval':
+                $document->admin_validation_status = 'approved';
+                $document->status = 'diterima';
+                $document->tanggal_persetujuan = now();
+                // Set deadline (e.g., 6 months from approval)
+                $document->deadline_penelitian = now()->addMonths(6);
+                break;
+            case 'reject':
+                $document->admin_validation_status = 'rejected';
+                $document->status = 'ditolak';
+                break;
+        }
+
+        if ($request->notes) {
+            $document->admin_validation_message = $request->notes;
+        }
+
+        $document->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Dokumen berhasil diteruskan.'
+        ]);
     }
 }
