@@ -98,11 +98,11 @@
             margin-left: 100px;
         }
         
-        .signature-space {
-            height: 80px;
-            width: 200px;
-            border-bottom: 1px solid #000;
-            margin: 20px auto;
+        .qr-box {
+            display: inline-block;
+            border: 1px solid #000;
+            padding: 8px;
+            border-radius: 4px;
         }
         
         .conditions {
@@ -248,7 +248,11 @@
             <p>Jakarta, {{ $date }}</p>
             <p><strong>Direktur Jenderal Bea dan Cukai</strong><br>
             <strong>u.b. Kepala Bagian Hubungan Masyarakat</strong></p>
-            <div class="signature-space"></div>
+            <div class="qr-box">
+                <img src="{{ $qr_url }}" alt="QR Verifikasi" width="160" height="160">
+            </div>
+            <p style="margin-top:10px"><strong>TTE & Verifikasi</strong></p>
+            <p>Scan QR untuk verifikasi dokumen</p>
             <p><strong>Dr. Ahmad Syarif, M.Si.</strong><br>
             NIP. 197508151998031001</p>
         </div>

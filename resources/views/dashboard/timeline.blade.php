@@ -182,17 +182,22 @@
                         </div>
 
                         <!-- Generated Letter Section -->
-                        @if ($dokumen->generated_letter_path)
+                        @php
+                            $letterPath = $dokumen->approval_letter_path ?? $dokumen->rejection_letter_path ?? $dokumen->generated_letter_path;
+                        @endphp
+                        @if ($letterPath)
                             <div class="mt-4">
                                 <div class="alert alert-success">
                                     <h6><i class="fas fa-file-alt"></i> Surat Persetujuan</h6>
-                                    <p class="mb-2">Surat persetujuan riset telah digenerate.</p>
-                                    <a href="{{ Storage::url($dokumen->generated_letter_path) }}" target="_blank"
+                                    <p class="mb-2">Surat persetujuan/penolakan riset telah digenerate.</p>
+                                    <a href="{{ route('operiset.letters.show', $dokumen->id) }}" target="_blank"
                                         class="btn btn-success btn-sm">
-                                        <i class="fas fa-download"></i> Download Surat
+                                        <i class="fas fa-download"></i> Lihat/Unduh Surat TTE
                                     </a>
                                     <small class="text-muted d-block mt-1">
-                                        Digenerate pada: {{ $dokumen->letter_generated_at->format('d M Y, H:i') }}
+                                        @if($dokumen->letter_generated_at)
+                                            Digenerate pada: {{ $dokumen->letter_generated_at->format('d M Y, H:i') }}
+                                        @endif
                                     </small>
                                 </div>
                             </div>

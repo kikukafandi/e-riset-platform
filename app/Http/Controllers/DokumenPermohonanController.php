@@ -51,7 +51,7 @@ class DokumenPermohonanController extends Controller
             'kuisioner'                 => 'nullable|file|mimes:pdf,doc,docx|max:2048', // 2MB
             'pedoman_wawancara'         => 'nullable|file|mimes:pdf,doc,docx|max:2048', // 2MB
             'proposal_fgd'              => 'nullable|file|mimes:pdf,doc,docx|max:2048', // 2MB
-            'kantor_tujuan'             => 'required|string|exists:kantor_bea_cukai,kode_kantor',
+            'kantor_tujuan'             => 'required|integer|exists:kantor_bea_cukai,id',
         ];
 
         // 2. Tentukan Pesan Error Kustom
@@ -90,11 +90,11 @@ class DokumenPermohonanController extends Controller
                 return back()->withErrors(['proposal' => 'Gagal mengupload file proposal.'])->withInput();
             }
 
-            $kuisionerPath = $request->hasFile('kuisioner') && $request->file('kuisioner')->isValid() ? 
+            $kuisionerPath = $request->hasFile('kuisioner') && $request->file('kuisioner')->isValid() ?
                 $request->file('kuisioner')->store('dokumen/kuisioner', 'public') : null;
-            $wawancaraPath = $request->hasFile('pedoman_wawancara') && $request->file('pedoman_wawancara')->isValid() ? 
+            $wawancaraPath = $request->hasFile('pedoman_wawancara') && $request->file('pedoman_wawancara')->isValid() ?
                 $request->file('pedoman_wawancara')->store('dokumen/wawancara', 'public') : null;
-            $fgdPath = $request->hasFile('proposal_fgd') && $request->file('proposal_fgd')->isValid() ? 
+            $fgdPath = $request->hasFile('proposal_fgd') && $request->file('proposal_fgd')->isValid() ?
                 $request->file('proposal_fgd')->store('dokumen/fgd', 'public') : null;
         } catch (\Exception $e) {
             Log::error('File upload error: ' . $e->getMessage());
@@ -133,7 +133,7 @@ class DokumenPermohonanController extends Controller
         try {
             // 7. Simpan ke Database
             $dokumen = DokumenPermohonan::create($dataToSave);
-            
+
             // Log successful creation
             Log::info('Dokumen permohonan berhasil dibuat', ['dokumen_id' => $dokumen->id, 'user_id' => Auth::id()]);
 
@@ -141,13 +141,13 @@ class DokumenPermohonanController extends Controller
             return redirect()->route('dashboardPage')->with('success', 'Permohonan dokumen berhasil dikirim!');
         } catch (\Exception $e) {
             Log::error('Database save error: ' . $e->getMessage());
-            
+
             // Delete uploaded files if database save fails
             if (isset($proposalPath)) Storage::disk('public')->delete($proposalPath);
             if (isset($kuisionerPath)) Storage::disk('public')->delete($kuisionerPath);
             if (isset($wawancaraPath)) Storage::disk('public')->delete($wawancaraPath);
             if (isset($fgdPath)) Storage::disk('public')->delete($fgdPath);
-            
+
             return back()->withErrors(['database' => 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage()])->withInput();
         }
     }
@@ -180,7 +180,7 @@ class DokumenPermohonanController extends Controller
     {
         try {
             $permohonan = DokumenPermohonan::findOrFail($id);
-            
+
             $request->validate([
                 'status' => 'required|in:diproses,diterima,ditolak,dokumen_tidak_lengkap'
             ]);
@@ -197,7 +197,7 @@ class DokumenPermohonanController extends Controller
             $permohonan->save();
 
             return response()->json([
-                'success' => true, 
+                'success' => true,
                 'status' => $permohonan->status,
                 'message' => 'Status berhasil diperbarui'
             ], 200);
@@ -307,7 +307,7 @@ class DokumenPermohonanController extends Controller
     public function checkResearcherEligibility($userId)
     {
         $user = User::findOrFail($userId);
-        
+
         // Check if user has any overdue research
         $hasOverdueResearch = $user->dokumenPermohonans()
             ->where('dapat_perijinan_lagi', false)
@@ -315,8 +315,8 @@ class DokumenPermohonanController extends Controller
 
         return response()->json([
             'can_apply' => !$hasOverdueResearch,
-            'message' => $hasOverdueResearch ? 
-                'Anda tidak dapat mengajukan penelitian baru karena memiliki penelitian yang belum diselesaikan dalam batas waktu yang ditentukan.' : 
+            'message' => $hasOverdueResearch ?
+                'Anda tidak dapat mengajukan penelitian baru karena memiliki penelitian yang belum diselesaikan dalam batas waktu yang ditentukan.' :
                 'Anda dapat mengajukan penelitian baru.'
         ]);
     }
@@ -340,90 +340,5 @@ class DokumenPermohonanController extends Controller
         return view('dashboard.research-completion', compact('overdueResearch', 'completedResearch'));
     }
 
-    /**
-     * Disposisi Eselon IV - Documents validated by Pelaksana
-     */
-    public function disposisiEselonIV()
-    {
-        $documents = DokumenPermohonan::with(['user', 'kantorBeaCukai'])
-            ->where('status', 'menunggu_verifikasi')
-            ->where('paper_validation_status', 'valid')
-            ->where('admin_validation_status', 'approved_by_pelaksana')
-            ->paginate(20);
-
-        return view('dashboard.disposisi.eselon-iv', compact('documents'));
-    }
-
-    /**
-     * Disposisi Eselon III - Documents forwarded from Eselon IV
-     */
-    public function disposisiEselonIII()
-    {
-        $documents = DokumenPermohonan::with(['user', 'kantorBeaCukai'])
-            ->where('status', 'menunggu_verifikasi')
-            ->where('admin_validation_status', 'forwarded_to_iii')
-            ->paginate(20);
-
-        return view('dashboard.disposisi.eselon-iii', compact('documents'));
-    }
-
-    /**
-     * Disposisi Eselon II - Documents forwarded from Eselon III for final approval
-     */
-    public function disposisiEselonII()
-    {
-        $documents = DokumenPermohonan::with(['user', 'kantorBeaCukai'])
-            ->where('status', 'menunggu_verifikasi')
-            ->where('admin_validation_status', 'forwarded_to_ii')
-            ->paginate(20);
-
-        return view('dashboard.disposisi.eselon-ii', compact('documents'));
-    }
-
-    /**
-     * Forward document to next level
-     */
-    public function forwardDocument(Request $request, $id)
-    {
-        $request->validate([
-            'forward_to' => 'required|in:eselon_iii,eselon_ii,final_approval',
-            'notes' => 'nullable|string|max:500'
-        ]);
-
-        $document = DokumenPermohonan::findOrFail($id);
-        
-        switch($request->forward_to) {
-            case 'approve_pelaksana':
-                $document->admin_validation_status = 'approved_by_pelaksana';
-                break;
-            case 'eselon_iii':
-                $document->admin_validation_status = 'forwarded_to_iii';
-                break;
-            case 'eselon_ii':
-                $document->admin_validation_status = 'forwarded_to_ii';
-                break;
-            case 'final_approval':
-                $document->admin_validation_status = 'approved';
-                $document->status = 'diterima';
-                $document->tanggal_persetujuan = now();
-                // Set deadline (e.g., 6 months from approval)
-                $document->deadline_penelitian = now()->addMonths(6);
-                break;
-            case 'reject':
-                $document->admin_validation_status = 'rejected';
-                $document->status = 'ditolak';
-                break;
-        }
-
-        if ($request->notes) {
-            $document->admin_validation_message = $request->notes;
-        }
-
-        $document->save();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Dokumen berhasil diteruskan.'
-        ]);
-    }
+    // Disposisi workflow removed per new simplified process
 }

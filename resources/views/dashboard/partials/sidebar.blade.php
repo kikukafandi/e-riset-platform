@@ -57,39 +57,27 @@
                         </a>
                     @endif
 
-                    {{-- Role pelaksana - Initial document validation --}}
+                    {{-- Role pelaksana - hanya validasi masuk --}}
                     @if (Auth::guard('petugas')->user()->role === 'pelaksana')
                         <a class="nav-link" href="{{ route('validation.queue') }}">
                             <div class="sb-nav-link-icon"><i class="fas fa-file-alt"></i></div>
-                            Validasi Dokumen Awal
-                        </a>
-                    @endif
-
-                    {{-- Role eselon iv --}}
-                    @if (Auth::guard('petugas')->user()->role === 'eselon_iv')
-                        <a class="nav-link" href="{{ route('dokumen.disposisi.iv') }}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-share-square"></i></div>
-                            Review & Disposisi ke Eselon III
+                            Validasi Masuk
                         </a>
                     @endif
 
                     {{-- Role eselon iii --}}
                     @if (Auth::guard('petugas')->user()->role === 'eselon_iii')
-                        <a class="nav-link" href="{{ route('dokumen.disposisi.iii') }}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-share-square"></i></div>
-                            Review & Disposisi ke Eselon II
+                        <a class="nav-link" href="{{ route('verification.queue') }}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-stamp"></i></div>
+                            Persetujuan TTE
                         </a>
                     @endif
 
-                    {{-- Role eselon ii - Highest authority --}}
+                    {{-- Role eselon ii - otoritas tertinggi --}}
                     @if (Auth::guard('petugas')->user()->role === 'eselon_ii')
-                        <a class="nav-link" href="{{ route('dokumen.disposisi.ii') }}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-stamp"></i></div>
-                            Persetujuan Final
-                        </a>
                         <a class="nav-link" href="{{ route('verification.queue') }}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-signature"></i></div>
-                            Verifikasi & Generate Surat
+                            <div class="sb-nav-link-icon"><i class="fas fa-stamp"></i></div>
+                            Persetujuan TTE
                         </a>
                     @endif
                 @endif

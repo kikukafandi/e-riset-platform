@@ -13,6 +13,11 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+// Operiset (applicant) access to signed letters
+Route::middleware(['auth'])->group(function () {
+    Route::get('/operiset/letters/{dokumen}', [\App\Http\Controllers\OperisetLettersController::class, 'show'])
+        ->name('operiset.letters.show');
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -129,11 +134,7 @@ Route::middleware(['CekLogin:petugas'])->group(function () {
     // Letter Generation Routes
     Route::get('/timeline/generate-letter/{id}', [TimelineController::class, 'generateApprovalLetter'])->name('timeline.generate.letter');
 
-    // Disposisi Routes (Document Flow Management)
-    Route::get('/dokumen/disposisi-iv', [DokumenPermohonanController::class, 'disposisiEselonIV'])->name('dokumen.disposisi.iv');
-    Route::get('/dokumen/disposisi-iii', [DokumenPermohonanController::class, 'disposisiEselonIII'])->name('dokumen.disposisi.iii');
-    Route::get('/dokumen/disposisi-ii', [DokumenPermohonanController::class, 'disposisiEselonII'])->name('dokumen.disposisi.ii');
-    Route::post('/dokumen/disposisi/{id}/forward', [DokumenPermohonanController::class, 'forwardDocument'])->name('dokumen.disposisi.forward');
+    // Disposisi Routes removed per new workflow (no multi-level forwarding)
 
     // API endpoints
     Route::get('/api/kantor-options', [KantorBeaCukaiController::class, 'getKantorOptions'])->name('api.kantor.options');

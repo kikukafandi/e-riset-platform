@@ -33,7 +33,7 @@ class DokumenPermohonan extends Model
 
     public function kantorBeaCukai()
     {
-        return $this->belongsTo(KantorBeaCukai::class, 'kantor_tujuan', 'kode_kantor');
+        return $this->belongsTo(KantorBeaCukai::class, 'kantor_tujuan', 'id');
     }
 
     public function topikRiset()

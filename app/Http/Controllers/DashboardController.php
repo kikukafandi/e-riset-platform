@@ -12,7 +12,7 @@ class DashboardController extends Controller
     {
 
         $permohonans = DokumenPermohonan::with('user')
-            ->where('user_id', auth()->id()) 
+            ->where('user_id', auth()->id())
             ->latest()
             ->get();
         return view('dashboard.index', compact('permohonans'));
@@ -30,14 +30,34 @@ class DashboardController extends Controller
     }
     public function dashboardPetugas()
     {
-        // ambil data permohonan beserta user-nya
-        $permohonans = DokumenPermohonan::with('user')->latest()->paginate(10);
+        $user = auth('petugas')->user();
 
-        $total = $permohonans->total();
-        $pending = DokumenPermohonan::where('status', 'diproses')->count();
-        $disetujui = DokumenPermohonan::where('status', 'diterima')->count();
-        $ditolak = DokumenPermohonan::where('status', 'ditolak')->count();
-        $dokumenTidakLengkap = DokumenPermohonan::where('status', 'dokumen_tidak_lengkap')->count();
+        // default metrics
+        $total = (int) DokumenPermohonan::count();
+        $pending = (int) DokumenPermohonan::where('status', 'diproses')->count();
+        $disetujui = (int) DokumenPermohonan::where('status', 'diterima')->count();
+        $ditolak = (int) DokumenPermohonan::where('status', 'ditolak')->count();
+        $dokumenTidakLengkap = (int) DokumenPermohonan::where('status', 'dokumen_tidak_lengkap')->count();
+
+        // filter list by role
+        if ($user && $user->role === 'pelaksana') {
+            // Dokumen baru masuk untuk divalidasi kelengkapan
+            $permohonans = DokumenPermohonan::with('user')
+                ->where('status', 'diproses')
+                ->where(function ($q) {
+                    $q->whereNull('paper_validation_status')
+                        ->orWhere('paper_validation_status', 'pending');
+                })
+                ->latest()
+                ->paginate(10);
+        } else {
+            // Pejabat (eselon_iii/eselon_ii) melihat dokumen yang sudah divalidasi pelaksana
+            $permohonans = DokumenPermohonan::with('user')
+                ->where('status', 'menunggu_tte')
+                ->latest()
+                ->paginate(10);
+        }
+
         return view('dashboard.petugas', compact('permohonans', 'total', 'pending', 'disetujui', 'ditolak', 'dokumenTidakLengkap'));
     }
     public function getStatistikPermohonan()

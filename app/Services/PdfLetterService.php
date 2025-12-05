@@ -11,6 +11,11 @@ class PdfLetterService
      */
     public function generateApprovalLetter($dokumen)
     {
+        // Build verification payload and QR URL
+        $verificationHash = hash('sha256', $dokumen->id . '|' . ($dokumen->user->email ?? '') . '|' . now()->timestamp);
+        $verificationUrl = url('/verify-letter?doc=' . $dokumen->id . '&hash=' . $verificationHash);
+        $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' . urlencode($verificationUrl);
+
         $letterData = [
             'document_number' => $this->generateDocumentNumber(),
             'date' => now()->format('d F Y'),
@@ -20,11 +25,13 @@ class PdfLetterService
             'office_destination' => $dokumen->kantorBeaCukai ? $dokumen->kantorBeaCukai->nama_kantor : '-',
             'office_code' => $dokumen->kantorBeaCukai ? $dokumen->kantorBeaCukai->kode_kantor : '-',
             'applicant_institution' => $dokumen->user->instansi ?: 'Peneliti Mandiri',
-            'research_period' => $dokumen->rencana_mulai_riset->format('d F Y') . ' - ' . $dokumen->rencana_selesai_riset->format('d F Y'),
-            'verification_date' => $dokumen->verified_at ? $dokumen->verified_at->format('d F Y') : now()->format('d F Y'),
+            'research_period' => $this->formatPeriod($dokumen->rencana_mulai_riset, $dokumen->rencana_selesai_riset),
+            'verification_date' => $this->formatDateOrNow($dokumen->verified_at),
             'paper_title' => $dokumen->paper_title ?: $dokumen->judul_riset,
             'doi_number' => $dokumen->doi_number,
             'verification_message' => $dokumen->verification_message,
+            'qr_url' => $qrUrl,
+            'verification_url' => $verificationUrl,
         ];
 
         $htmlContent = $this->generateLetterHtml($letterData);
@@ -46,6 +53,10 @@ class PdfLetterService
      */
     public function generateRejectionLetter($dokumen)
     {
+        $verificationHash = hash('sha256', $dokumen->id . '|' . ($dokumen->user->email ?? '') . '|' . now()->timestamp);
+        $verificationUrl = url('/verify-letter?doc=' . $dokumen->id . '&hash=' . $verificationHash);
+        $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' . urlencode($verificationUrl);
+
         $letterData = [
             'document_number' => $this->generateDocumentNumber(),
             'date' => now()->format('d F Y'),
@@ -53,8 +64,10 @@ class PdfLetterService
             'research_title' => $dokumen->judul_riset,
             'research_topic' => $dokumen->topik_tujuan_riset,
             'applicant_institution' => $dokumen->user->instansi ?: 'Peneliti Mandiri',
-            'verification_date' => $dokumen->verified_at ? $dokumen->verified_at->format('d F Y') : now()->format('d F Y'),
+            'verification_date' => $this->formatDateOrNow($dokumen->verified_at),
             'rejection_reason' => $dokumen->verification_message,
+            'qr_url' => $qrUrl,
+            'verification_url' => $verificationUrl,
         ];
 
         $htmlContent = $this->generateRejectionLetterHtml($letterData);
@@ -122,6 +135,43 @@ class PdfLetterService
             // Fallback: return HTML content as text file for now
             return $html;
         }
+    }
+
+    private function formatDateOrNow($date)
+    {
+        try {
+            if ($date instanceof \Carbon\Carbon) {
+                return $date->format('d F Y');
+            }
+            if (is_string($date) && !empty($date)) {
+                return \Carbon\Carbon::parse($date)->format('d F Y');
+            }
+        } catch (\Throwable $e) {
+            // fallback below
+        }
+        return now()->format('d F Y');
+    }
+
+    private function formatPeriod($start, $end)
+    {
+        $startStr = $this->formatDateOrDash($start);
+        $endStr = $this->formatDateOrDash($end);
+        return $startStr . ' - ' . $endStr;
+    }
+
+    private function formatDateOrDash($date)
+    {
+        try {
+            if ($date instanceof \Carbon\Carbon) {
+                return $date->format('d F Y');
+            }
+            if (is_string($date) && !empty($date)) {
+                return \Carbon\Carbon::parse($date)->format('d F Y');
+            }
+        } catch (\Throwable $e) {
+            // ignore and fallback
+        }
+        return '-';
     }
 
     /**

@@ -102,9 +102,9 @@
                                         @foreach ($kantorByProvinsi as $provinsi => $kantors)
                                             <optgroup label="{{ $provinsi }}">
                                                 @foreach ($kantors as $kantor)
-                                                    <option value="{{ $kantor->kode_kantor }}"
-                                                        {{ old('kantor_tujuan') == $kantor->kode_kantor ? 'selected' : '' }}>
-                                                        {{ $kantor->kode_kantor }} - {{ $kantor->nama_kantor }}
+                                                    <option value="{{ $kantor->id }}"
+                                                        {{ old('kantor_tujuan') == $kantor->id ? 'selected' : '' }}>
+                                                        {{ $kantor->kode_kantor ? $kantor->kode_kantor . ' - ' : '' }}{{ $kantor->nama_kantor }}
                                                     </option>
                                                 @endforeach
                                             </optgroup>
