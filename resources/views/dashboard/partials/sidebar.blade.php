@@ -40,12 +40,12 @@
 
                         <a class="nav-link" href="{{ route('validation.queue') }}">
                             <div class="sb-nav-link-icon"><i class="fas fa-clipboard-check"></i></div>
-                            Queue Validasi Paper
+                            Queue Validasi Berkas
                         </a>
 
                         <a class="nav-link" href="{{ route('verification.queue') }}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-user-tie"></i></div>
-                            Queue Verifikasi Pejabat
+                            <div class="sb-nav-link-icon"><i class="fas fa-signature"></i></div>
+                            Queue TTE Pejabat
                         </a>
                     @endif
 
@@ -61,23 +61,31 @@
                     @if (Auth::guard('petugas')->user()->role === 'pelaksana')
                         <a class="nav-link" href="{{ route('validation.queue') }}">
                             <div class="sb-nav-link-icon"><i class="fas fa-file-alt"></i></div>
-                            Validasi Masuk
+                            Validasi Berkas
+                        </a>
+                    @endif
+
+                    {{-- Role eselon iv - verifikasi tema & narasumber --}}
+                    @if (Auth::guard('petugas')->user()->role === 'eselon_iv')
+                        <a class="nav-link" href="{{ route('dashboard.petugas') }}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-clipboard-check"></i></div>
+                            Verifikasi Tema
                         </a>
                     @endif
 
                     {{-- Role eselon iii --}}
                     @if (Auth::guard('petugas')->user()->role === 'eselon_iii')
                         <a class="nav-link" href="{{ route('verification.queue') }}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-stamp"></i></div>
-                            Persetujuan TTE
+                            <div class="sb-nav-link-icon"><i class="fas fa-signature"></i></div>
+                            Queue TTE
                         </a>
                     @endif
 
                     {{-- Role eselon ii - otoritas tertinggi --}}
                     @if (Auth::guard('petugas')->user()->role === 'eselon_ii')
                         <a class="nav-link" href="{{ route('verification.queue') }}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-stamp"></i></div>
-                            Persetujuan TTE
+                            <div class="sb-nav-link-icon"><i class="fas fa-signature"></i></div>
+                            Queue TTE
                         </a>
                     @endif
                 @endif

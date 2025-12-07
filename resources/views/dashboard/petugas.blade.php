@@ -117,16 +117,50 @@
                                     </td>
                                     <td>{{ $permohonan->user->instansi ?? 'Peneliti Mandiri' }}</td>
                                     <td>
-                                        <select class="form-select form-select-sm status-dropdown
-                                            {{ $permohonan->status === 'diproses' ? 'bg-warning text-dark' : 
-                                               ($permohonan->status === 'diterima' ? 'bg-success text-white' : 
-                                                ($permohonan->status === 'ditolak' ? 'bg-danger text-white' : 'bg-secondary text-white')) }}"
-                                            data-id="{{ $permohonan->id }}">
-                                            <option value="dokumen_tidak_lengkap" {{ $permohonan->status == 'dokumen_tidak_lengkap' ? 'selected' : '' }}>Dokumen Tidak Lengkap</option>
-                                            <option value="diproses" {{ $permohonan->status == 'diproses' ? 'selected' : '' }}>Diproses</option>
-                                            <option value="diterima" {{ $permohonan->status == 'diterima' ? 'selected' : '' }}>Diterima</option>
-                                            <option value="ditolak" {{ $permohonan->status == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
-                                        </select>
+                                        @php
+                                            $statusLabels = [
+                                                'diproses' => 'Diproses',
+                                                'diterima' => 'Diterima',
+                                                'ditolak' => 'Ditolak',
+                                                'dokumen_tidak_lengkap' => 'Dokumen Tidak Lengkap',
+                                            ];
+                                            $badgeClass = match($permohonan->status) {
+                                                'diproses' => 'bg-warning text-dark',
+                                                'diterima' => 'bg-success',
+                                                'ditolak' => 'bg-danger',
+                                                'dokumen_tidak_lengkap' => 'bg-secondary',
+                                                default => 'bg-light text-dark',
+                                            };
+                                            // Dropdown sesuai role petugas yang login
+                                            $allowedTransitions = [];
+                                            $petugasRole = auth('petugas')->user()->role ?? null;
+                                            $isEselonTTE = in_array($petugasRole, ['eselon_ii', 'eselon_iii']);
+                                            if ($permohonan->status === 'diproses') {
+                                                if ($petugasRole === 'pelaksana') {
+                                                    // Pelaksana: verifikasi berkas, bisa tandai dokumen tidak lengkap
+                                                    $allowedTransitions = ['verifikasi_berkas' => 'Verifikasi Berkas ✓', 'dokumen_tidak_lengkap' => 'Dokumen Tidak Lengkap'];
+                                                } elseif ($petugasRole === 'eselon_iv') {
+                                                    // Eselon IV: verifikasi tema & narasumber
+                                                    $allowedTransitions = ['verifikasi_tema' => 'Verifikasi Tema & Narasumber ✓', 'ditolak' => 'Tolak'];
+                                                }
+                                                // Eselon II/III: tidak pakai dropdown, redirect ke halaman TTE
+                                            }
+                                        @endphp
+                                        @if($isEselonTTE && $permohonan->status === 'diproses')
+                                            {{-- Eselon II/III: Button untuk TTE di halaman terpisah --}}
+                                            <a href="{{ route('verification.queue') }}" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-signature"></i> Proses TTE
+                                            </a>
+                                        @elseif(count($allowedTransitions) > 0)
+                                            <select class="form-select form-select-sm status-dropdown {{ $badgeClass }}" data-id="{{ $permohonan->id }}">
+                                                <option value="" disabled selected>-- Pilih Aksi --</option>
+                                                @foreach($allowedTransitions as $value => $label)
+                                                    <option value="{{ $value }}">{{ $label }}</option>
+                                                @endforeach
+                                            </select>
+                                        @else
+                                            <span class="badge {{ $badgeClass }}">{{ $statusLabels[$permohonan->status] ?? ucfirst(str_replace('_', ' ', $permohonan->status)) }}</span>
+                                        @endif
                                     </td>
                                     <td>
                                         @if($permohonan->paper_file)

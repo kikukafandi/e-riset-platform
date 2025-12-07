@@ -32,6 +32,11 @@ class DashboardController extends Controller
     {
         $user = auth('petugas')->user();
 
+        // Eselon II/III: redirect ke halaman Queue TTE
+        if ($user && in_array($user->role, ['eselon_ii', 'eselon_iii'])) {
+            return redirect()->route('verification.queue');
+        }
+
         // default metrics
         $total = (int) DokumenPermohonan::count();
         $pending = (int) DokumenPermohonan::where('status', 'diproses')->count();
@@ -39,21 +44,26 @@ class DashboardController extends Controller
         $ditolak = (int) DokumenPermohonan::where('status', 'ditolak')->count();
         $dokumenTidakLengkap = (int) DokumenPermohonan::where('status', 'dokumen_tidak_lengkap')->count();
 
-        // filter list by role
+        // Filter berdasarkan role dan tahap verifikasi
         if ($user && $user->role === 'pelaksana') {
-            // Dokumen baru masuk untuk divalidasi kelengkapan
+            // Pelaksana: lihat dokumen yang belum diverifikasi berkas (tanggal_validasi_admin null)
             $permohonans = DokumenPermohonan::with('user')
                 ->where('status', 'diproses')
-                ->where(function ($q) {
-                    $q->whereNull('paper_validation_status')
-                        ->orWhere('paper_validation_status', 'pending');
-                })
+                ->whereNull('tanggal_validasi_admin')
+                ->latest()
+                ->paginate(10);
+        } elseif ($user && $user->role === 'eselon_iv') {
+            // Eselon IV: lihat dokumen yang sudah verifikasi berkas tapi belum verifikasi tema
+            $permohonans = DokumenPermohonan::with('user')
+                ->where('status', 'diproses')
+                ->whereNotNull('tanggal_validasi_admin')
+                ->whereNull('tanggal_verifikasi_pejabat')
                 ->latest()
                 ->paginate(10);
         } else {
-            // Pejabat (eselon_iii/eselon_ii) melihat dokumen yang sudah divalidasi pelaksana
+            // Default (super_user, super_admin): lihat semua yang diproses
             $permohonans = DokumenPermohonan::with('user')
-                ->where('status', 'menunggu_tte')
+                ->where('status', 'diproses')
                 ->latest()
                 ->paginate(10);
         }

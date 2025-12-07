@@ -8,7 +8,10 @@ use Illuminate\Notifications\Notifiable;
 class Petugas extends Authenticatable
 {
     use HasFactory, Notifiable;
-
+    public function getRoleAttribute()
+    {
+        return $this->attributes['role'] ?? null;
+    }
     protected $table = 'petugas'; // pastikan sesuai nama tabel di DB
 
     protected $guarded = ['id'];

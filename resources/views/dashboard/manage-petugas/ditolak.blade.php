@@ -43,6 +43,7 @@
                                 <td>3000000003</td>
                                 <td>Surat Observasi</td>
                                 <td><span class="badge bg-danger">Ditolak</span></td>
+                                                                <td><span class="badge bg-danger">Ditolak</span></td>
                                 <td>2025/09/22</td>
                                 <td>
                                     <a href="#" class="btn btn-primary btn-sm" title="Lihat Detail Alasan">

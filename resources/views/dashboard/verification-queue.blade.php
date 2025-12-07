@@ -1,35 +1,40 @@
 @extends('dashboard.layouts.app')
-@section('title', 'Queue Verifikasi Pejabat')
+@section('title', 'Queue TTE Pejabat')
 @section('content')
 <div class="container mt-4">
-    <h1 class="mb-4">Queue Verifikasi Pejabat</h1>
+    <h1 class="mb-4"><i class="fas fa-signature"></i> Queue TTE Pejabat</h1>
     
     @if (session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i> 
+        <strong>Info:</strong> Permohonan di bawah ini sudah melewati verifikasi berkas (Pelaksana) dan verifikasi tema/narasumber (Eselon IV). 
+        Silakan lakukan TTE untuk menyetujui atau tolak permohonan.
+    </div>
+
     <div class="card">
-        <div class="card-header">
+        <div class="card-header bg-primary text-white">
             <h5 class="mb-0">
-                <i class="fas fa-user-tie"></i> Paper Menunggu Verifikasi Substansi
-                <span class="badge badge-info">{{ $pendingVerifications->total() }}</span>
+                <i class="fas fa-file-signature"></i> Permohonan Menunggu TTE
+                <span class="badge bg-light text-dark">{{ $pendingVerifications->total() }}</span>
             </h5>
         </div>
         <div class="card-body">
             @if($pendingVerifications->count() > 0)
                 <div class="table-responsive">
-                    <table class="table table-striped">
-                        <thead>
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
                             <tr>
                                 <th>#</th>
                                 <th>Judul Riset</th>
                                 <th>Peneliti</th>
                                 <th>Kantor Tujuan</th>
-                                <th>Tanggal Validasi Admin</th>
-                                <th>File Paper</th>
-                                <th>DOI Number</th>
-                                <th>Status Admin</th>
-                                <th>Aksi</th>
+                                <th>Verifikasi Berkas</th>
+                                <th>Verifikasi Tema</th>
+                                <th>Dokumen</th>
+                                <th>Aksi TTE</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -38,50 +43,58 @@
                                     <td>{{ $loop->iteration + ($pendingVerifications->currentPage() - 1) * $pendingVerifications->perPage() }}</td>
                                     <td>
                                         <strong>{{ Str::limit($dokumen->judul_riset, 40) }}</strong>
-                                        <br><small class="text-muted">{{ $dokumen->topik_tujuan_riset }}</small>
+                                        <br><small class="text-muted">Topik: {{ $dokumen->topik_tujuan_riset }}</small>
                                     </td>
                                     <td>
-                                        {{ $dokumen->user->nama_lengkap }}
-                                        <br><small class="text-muted">{{ $dokumen->user->email }}</small>
-                                        @if($dokumen->user->instansi)
+                                        {{ $dokumen->user->nama_lengkap ?? '-' }}
+                                        <br><small class="text-muted">{{ $dokumen->user->email ?? '' }}</small>
+                                        @if($dokumen->user->instansi ?? false)
                                             <br><small class="text-info">{{ $dokumen->user->instansi }}</small>
                                         @endif
                                     </td>
                                     <td>
                                         @if($dokumen->kantorBeaCukai)
-                                            <span class="badge badge-info">{{ $dokumen->kantorBeaCukai->kode_kantor }}</span>
+                                            <span class="badge bg-info">{{ $dokumen->kantorBeaCukai->kode_kantor }}</span>
                                             <br><small>{{ $dokumen->kantorBeaCukai->nama_kantor }}</small>
                                         @else
                                             <span class="text-muted">-</span>
                                         @endif
                                     </td>
-                                    <td>{{ $dokumen->paper_validated_at->format('d M Y, H:i') }}</td>
+                                    <td>
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check"></i> Terverifikasi
+                                        </span>
+                                        @if($dokumen->tanggal_validasi_admin)
+                                            <br><small class="text-success">{{ \Carbon\Carbon::parse($dokumen->tanggal_validasi_admin)->format('d M Y') }}</small>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check"></i> Terverifikasi
+                                        </span>
+                                        @if($dokumen->tanggal_verifikasi_pejabat)
+                                            <br><small class="text-success">{{ \Carbon\Carbon::parse($dokumen->tanggal_verifikasi_pejabat)->format('d M Y') }}</small>
+                                        @endif
+                                    </td>
                                     <td>
                                         <div class="btn-group-vertical">
-                                            <a href="{{ Storage::url($dokumen->paper_file) }}" target="_blank" class="btn btn-sm btn-outline-primary mb-1">
-                                                <i class="fas fa-file-pdf"></i> Lihat Paper
-                                            </a>
-                                            <a href="{{ Storage::url($dokumen->proposal) }}" target="_blank" class="btn btn-sm btn-outline-secondary">
-                                                <i class="fas fa-file-alt"></i> Lihat Proposal
-                                            </a>
+                                            @if($dokumen->proposal)
+                                                <a href="{{ Storage::url($dokumen->proposal) }}" target="_blank" class="btn btn-sm btn-outline-primary mb-1">
+                                                    <i class="fas fa-file-alt"></i> Proposal
+                                                </a>
+                                            @endif
+                                            @if($dokumen->surat_pengantar)
+                                                <a href="{{ Storage::url($dokumen->surat_pengantar) }}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                                    <i class="fas fa-envelope"></i> Surat Pengantar
+                                                </a>
+                                            @endif
                                         </div>
-                                    </td>
-                                    <td>
-                                        {{ $dokumen->doi_number ?: '-' }}
-                                    </td>
-                                    <td>
-                                        <span class="badge badge-success">
-                                            <i class="fas fa-check"></i> Valid
-                                        </span>
-                                        @if($dokumen->paper_validation_message)
-                                            <br><small class="text-muted">{{ Str::limit($dokumen->paper_validation_message, 50) }}</small>
-                                        @endif
                                     </td>
                                     <td>
                                         <div class="btn-group-vertical" role="group">
                                             <button type="button" class="btn btn-success btn-sm mb-1" 
                                                     onclick="verifyDocument({{ $dokumen->id }}, 'approved')">
-                                                <i class="fas fa-check"></i> Setujui
+                                                <i class="fas fa-signature"></i> TTE & Setujui
                                             </button>
                                             <button type="button" class="btn btn-danger btn-sm" 
                                                     onclick="showVerificationModal({{ $dokumen->id }}, 'rejected')">
@@ -105,38 +118,41 @@
                 </div>
             @else
                 <div class="text-center py-5">
-                    <i class="fas fa-user-tie fa-3x text-muted mb-3"></i>
-                    <h5>Tidak ada paper yang menunggu verifikasi</h5>
-                    <p class="text-muted">Semua paper telah diverifikasi atau belum ada yang perlu diverifikasi.</p>
+                    <i class="fas fa-file-signature fa-3x text-muted mb-3"></i>
+                    <h5>Tidak ada permohonan yang menunggu TTE</h5>
+                    <p class="text-muted">Semua permohonan telah diproses atau belum ada yang siap untuk TTE.</p>
+                    <a href="{{ route('dashboard.petugas') }}" class="btn btn-primary">
+                        <i class="fas fa-arrow-left"></i> Kembali ke Dashboard
+                    </a>
                 </div>
             @endif
         </div>
     </div>
 </div>
 
-<!-- Verification Modal -->
+<!-- TTE Verification Modal -->
 <div class="modal fade" id="verificationModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="verificationModalTitle">Verifikasi Substansi</h5>
+                <h5 class="modal-title" id="verificationModalTitle">TTE Permohonan</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <div class="mb-3">
-                    <label class="form-label">Status Verifikasi</label>
+                    <label class="form-label">Status TTE</label>
                     <div id="verification-status-display" class="form-control-plaintext"></div>
                 </div>
                 
                 <div class="mb-3">
-                    <label for="verification_message" class="form-label">Catatan/Pesan</label>
+                    <label for="verification_message" class="form-label">Catatan/Alasan</label>
                     <textarea id="verification_message" class="form-control" rows="4" 
-                              placeholder="Masukkan catatan atau alasan (opsional untuk persetujuan, wajib untuk penolakan)..."></textarea>
+                              placeholder="Masukkan catatan atau alasan (wajib diisi untuk penolakan)..."></textarea>
                 </div>
 
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle"></i>
-                    <strong>Catatan:</strong> 
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Perhatian:</strong> 
                     <span id="verification-note"></span>
                 </div>
             </div>
@@ -171,14 +187,14 @@
 let currentDokumenId = null;
 let currentVerificationStatus = null;
 
-// Quick approve without modal
+// Quick TTE approve without modal
 function verifyDocument(dokumenId, status) {
-    if (status === 'approved' && confirm('Yakin ingin menyetujui dokumen ini? Surat persetujuan akan digenerate otomatis.')) {
+    if (status === 'approved' && confirm('Yakin ingin melakukan TTE dan menyetujui permohonan ini?\n\nSetelah TTE, surat persetujuan akan digenerate otomatis dan peneliti dapat memulai penelitian.')) {
         submitVerification(dokumenId, status, '');
     }
 }
 
-// Show verification modal for rejection or detailed approval
+// Show verification modal for rejection
 function showVerificationModal(dokumenId, status) {
     currentDokumenId = dokumenId;
     currentVerificationStatus = status;
@@ -192,21 +208,21 @@ function showVerificationModal(dokumenId, status) {
     const btnText = document.getElementById('btn-text');
     
     if (status === 'approved') {
-        title.textContent = 'Setujui Permohonan Riset';
-        statusDisplay.textContent = 'Disetujui';
+        title.textContent = 'TTE & Setujui Permohonan';
+        statusDisplay.textContent = 'Disetujui (TTE)';
         statusDisplay.className = 'form-control-plaintext text-success fw-bold';
-        note.textContent = 'Dokumen akan disetujui dan surat persetujuan akan digenerate otomatis.';
+        note.textContent = 'Permohonan akan disetujui dengan TTE dan surat persetujuan akan digenerate otomatis. Peneliti dapat memulai penelitian setelah ini.';
         btn.className = 'btn btn-success';
-        btnIcon.innerHTML = '<i class="fas fa-check"></i>';
-        btnText.textContent = 'Setujui Dokumen';
+        btnIcon.innerHTML = '<i class="fas fa-signature"></i>';
+        btnText.textContent = 'TTE & Setujui';
     } else {
         title.textContent = 'Tolak Permohonan Riset';
         statusDisplay.textContent = 'Ditolak';
         statusDisplay.className = 'form-control-plaintext text-danger fw-bold';
-        note.textContent = 'Alasan penolakan wajib diisi untuk memberikan feedback kepada peneliti.';
+        note.textContent = 'Alasan penolakan wajib diisi untuk memberikan feedback kepada peneliti. Permohonan tidak dapat dilanjutkan setelah ditolak.';
         btn.className = 'btn btn-danger';
         btnIcon.innerHTML = '<i class="fas fa-times"></i>';
-        btnText.textContent = 'Tolak Dokumen';
+        btnText.textContent = 'Tolak Permohonan';
     }
     
     document.getElementById('verification_message').value = '';

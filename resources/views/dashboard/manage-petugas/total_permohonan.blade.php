@@ -34,7 +34,7 @@
                                     <td>1000000001</td>
                                     <td>Surat Izin Penelitian</td>
                                     <td class="text-center">
-                                        <span class="badge bg-warning text-dark px-3 py-2">Pending</span>
+                                        <span class="badge bg-info px-3 py-2">Diajukan</span>
                                     </td>
                                     <td class="text-center">2025/09/20</td>
                                     <td class="text-center">

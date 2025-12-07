@@ -124,7 +124,7 @@ class DokumenPermohonanController extends Controller
         $dataToSave['pedoman_wawancara'] = $wawancaraPath;
         $dataToSave['proposal_fgd'] = $fgdPath;
         $dataToSave['user_id'] = Auth::id();
-        $dataToSave['status'] = 'diproses';
+        $dataToSave['status'] = 'submitted';
         $dataToSave['topik_tujuan_riset'] = $namaTopikFinal; // Ini adalah perbaikan utamanya
 
         // Hapus field sementara
@@ -180,22 +180,37 @@ class DokumenPermohonanController extends Controller
     {
         try {
             $permohonan = DokumenPermohonan::findOrFail($id);
-
+            $user = auth('petugas')->user();
             $request->validate([
-                'status' => 'required|in:diproses,diterima,ditolak,dokumen_tidak_lengkap'
+                'status' => 'required|string'
             ]);
-
-            $permohonan->status = $request->status;
-
-            // If approved, set deadline and research status
-            if ($request->status === 'diterima') {
-                $permohonan->tanggal_persetujuan = now();
-                $permohonan->deadline_penelitian = now()->addYear(); // 1 year deadline
-                $permohonan->status_penelitian = 'sedang_berjalan';
+            $toStatus = $request->status;
+            
+            // Handle verifikasi actions (tidak mengubah status database)
+            if ($toStatus === 'verifikasi_berkas') {
+                // Pelaksana verifikasi berkas - tandai sudah diverifikasi
+                $permohonan->tanggal_validasi_admin = now();
+                $permohonan->save();
+                return response()->json([
+                    'success' => true,
+                    'status' => $permohonan->status,
+                    'message' => 'Berkas berhasil diverifikasi. Lanjut ke Eselon IV.'
+                ], 200);
             }
-
-            $permohonan->save();
-
+            
+            if ($toStatus === 'verifikasi_tema') {
+                // Eselon IV verifikasi tema & narasumber
+                $permohonan->tanggal_verifikasi_pejabat = now();
+                $permohonan->save();
+                return response()->json([
+                    'success' => true,
+                    'status' => $permohonan->status,
+                    'message' => 'Tema & narasumber berhasil diverifikasi. Lanjut ke TTE.'
+                ], 200);
+            }
+            
+            // Use strict workflow validation untuk status database
+            $permohonan->updateStatusWithRole($toStatus, $user);
             return response()->json([
                 'success' => true,
                 'status' => $permohonan->status,

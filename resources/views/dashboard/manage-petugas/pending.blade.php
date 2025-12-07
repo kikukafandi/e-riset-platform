@@ -34,7 +34,21 @@
                                 <td>1000000001</td>
                                 <td>Surat Izin Penelitian</td>
                                 <td class="text-center">
-                                    <span class="badge bg-warning text-dark px-3 py-2">Pending</span>
+                                    @php
+                                        use App\Helpers\ResearchStatus;
+                                        $statusLabels = [
+                                            ResearchStatus::SUBMITTED => 'Diajukan',
+                                            ResearchStatus::VERIFIED_DOCUMENTS => 'Verifikasi Dokumen',
+                                            ResearchStatus::VERIFIED_THEME => 'Verifikasi Topik',
+                                            ResearchStatus::CONFIRMED_DATA_NARASUMBER => 'Konfirmasi Data/Narasumber',
+                                            ResearchStatus::APPROVED => 'Disetujui',
+                                            ResearchStatus::RESEARCH_PERIOD => 'Periode Riset',
+                                            ResearchStatus::SUBMITTED_PAPER => 'Paper Dikirim',
+                                            ResearchStatus::COMPLETED => 'Selesai',
+                                        ];
+                                        $badgeClass = 'bg-warning text-dark';
+                                    @endphp
+                                    <span class="badge {{ $badgeClass }}">{{ $statusLabels[ResearchStatus::SUBMITTED] }}</span>
                                 </td>
                                 <td class="text-center">2025/09/20</td>
                                 <td class="text-center">

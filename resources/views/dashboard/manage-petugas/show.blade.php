@@ -38,15 +38,31 @@
                     <tr>
                         <th>Status</th>
                         <td>
-                            @if($dokumen->status === 'diproses')
-                                <span class="badge bg-warning text-dark">Diproses</span>
-                            @elseif($dokumen->status === 'diterima')
-                                <span class="badge bg-success">Diterima</span>
-                            @elseif($dokumen->status === 'ditolak')
-                                <span class="badge bg-danger">Ditolak</span>
-                            @else
-                                <span class="badge bg-secondary">Dokumen Tidak Lengkap</span>
-                            @endif
+                            @php
+                                use App\Helpers\ResearchStatus;
+                                $statusLabels = [
+                                    ResearchStatus::SUBMITTED => 'Diajukan',
+                                    ResearchStatus::VERIFIED_DOCUMENTS => 'Verifikasi Dokumen',
+                                    ResearchStatus::VERIFIED_THEME => 'Verifikasi Topik',
+                                    ResearchStatus::CONFIRMED_DATA_NARASUMBER => 'Konfirmasi Data/Narasumber',
+                                    ResearchStatus::APPROVED => 'Disetujui',
+                                    ResearchStatus::RESEARCH_PERIOD => 'Periode Riset',
+                                    ResearchStatus::SUBMITTED_PAPER => 'Paper Dikirim',
+                                    ResearchStatus::COMPLETED => 'Selesai',
+                                ];
+                                $badgeClass = match($dokumen->status) {
+                                    ResearchStatus::SUBMITTED => 'bg-info',
+                                    ResearchStatus::VERIFIED_DOCUMENTS, ResearchStatus::VERIFIED_THEME, ResearchStatus::CONFIRMED_DATA_NARASUMBER => 'bg-warning text-dark',
+                                    ResearchStatus::APPROVED => 'bg-success',
+                                    ResearchStatus::RESEARCH_PERIOD => 'bg-primary',
+                                    ResearchStatus::SUBMITTED_PAPER => 'bg-secondary',
+                                    ResearchStatus::COMPLETED => 'bg-success',
+                                    default => 'bg-light text-dark',
+                                };
+                            @endphp
+                            <span class="badge {{ $badgeClass }}">
+                                {{ $statusLabels[$dokumen->status] ?? ucfirst(str_replace('_', ' ', $dokumen->status)) }}
+                            </span>
                         </td>
                     </tr>
                 </table>

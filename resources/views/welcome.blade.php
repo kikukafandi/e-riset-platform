@@ -18,8 +18,8 @@
             font-family: 'Poppins', sans-serif;
         }
         .hero-section {
-            background: linear-gradient(rgba(13, 110, 253, 0.1), rgba(13, 110, 253, 0.1)), url('https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=2070&auto=format&fit=crop') no-repeat center center;
-            background-size: cover;
+            background: linear-gradient(rgba(13, 110, 253, 0.1), rgba(13, 110, 253, 0.1)), url('https://www.humasindonesia.id/images/berita/humas-indonesia-manfaat-riset-bagi-humas-2.jpeg') no-repeat center center;
+            background-size: cover; // buat crop image
         }
         .card-feature {
             transition: transform 0.3s ease, box-shadow 0.3s ease;
