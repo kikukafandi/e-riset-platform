@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\DokumenPermohonan;
 use App\Models\TopikRiset;
 use App\Models\User;
+use App\Traits\KantorIsolation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Log;
 
 class DokumenPermohonanController extends Controller
 {
+    use KantorIsolation;
     /**
      * Display a listing of the resource.
      */
@@ -124,7 +126,7 @@ class DokumenPermohonanController extends Controller
         $dataToSave['pedoman_wawancara'] = $wawancaraPath;
         $dataToSave['proposal_fgd'] = $fgdPath;
         $dataToSave['user_id'] = Auth::id();
-        $dataToSave['status'] = 'diproses';
+        $dataToSave['status'] = 'diproses'; // Status awal permohonan baru
         $dataToSave['topik_tujuan_riset'] = $namaTopikFinal; // Ini adalah perbaikan utamanya
 
         // Hapus field sementara
@@ -180,22 +182,46 @@ class DokumenPermohonanController extends Controller
     {
         try {
             $permohonan = DokumenPermohonan::findOrFail($id);
+            $user = auth('petugas')->user();
 
-            $request->validate([
-                'status' => 'required|in:diproses,diterima,ditolak,dokumen_tidak_lengkap'
-            ]);
-
-            $permohonan->status = $request->status;
-
-            // If approved, set deadline and research status
-            if ($request->status === 'diterima') {
-                $permohonan->tanggal_persetujuan = now();
-                $permohonan->deadline_penelitian = now()->addYear(); // 1 year deadline
-                $permohonan->status_penelitian = 'sedang_berjalan';
+            // Validasi akses kantor
+            if (!$this->canAccessDokumen($permohonan, $user)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda tidak memiliki akses ke dokumen dari kantor lain.'
+                ], 403);
             }
 
-            $permohonan->save();
-
+            $request->validate([
+                'status' => 'required|string'
+            ]);
+            $toStatus = $request->status;
+            
+            // Handle verifikasi actions (tidak mengubah status database)
+            if ($toStatus === 'verifikasi_berkas') {
+                // Pelaksana verifikasi berkas - tandai sudah diverifikasi
+                $permohonan->tanggal_validasi_admin = now();
+                $permohonan->save();
+                return response()->json([
+                    'success' => true,
+                    'status' => $permohonan->status,
+                    'message' => 'Berkas berhasil diverifikasi. Lanjut ke Eselon IV.'
+                ], 200);
+            }
+            
+            if ($toStatus === 'verifikasi_tema') {
+                // Eselon IV verifikasi tema & narasumber
+                $permohonan->tanggal_verifikasi_pejabat = now();
+                $permohonan->save();
+                return response()->json([
+                    'success' => true,
+                    'status' => $permohonan->status,
+                    'message' => 'Tema & narasumber berhasil diverifikasi. Lanjut ke TTE.'
+                ], 200);
+            }
+            
+            // Use strict workflow validation untuk status database
+            $permohonan->updateStatusWithRole($toStatus, $user);
             return response()->json([
                 'success' => true,
                 'status' => $permohonan->status,
@@ -226,10 +252,14 @@ class DokumenPermohonanController extends Controller
             }
         }
 
-        // Jika login via petugas, biarkan bisa lihat semuanya
+        // Jika login via petugas, cek akses kantor
         if (auth('petugas')->check()) {
             $petugas = auth('petugas')->user();
-            // bisa tambahkan logika tambahan kalau mau
+            
+            // Validasi akses berdasarkan kantor
+            if (!$this->canAccessDokumen($dokumen, $petugas)) {
+                abort(403, 'Anda tidak memiliki akses ke dokumen dari kantor lain.');
+            }
         }
 
         return view('dashboard.manage-petugas.show', compact('dokumen'));

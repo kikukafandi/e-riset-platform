@@ -43,6 +43,7 @@
                                 <td>2000000002</td>
                                 <td>Permohonan Data</td>
                                 <td><span class="badge bg-success">Disetujui</span></td>
+                                                                <td><span class="badge bg-success">{{ App\Helpers\ResearchStatus::APPROVED ? 'Disetujui' : '' }}</span></td>
                                 <td>2025/09/21</td>
                                 <td>
                                     <a href="#" class="btn btn-primary btn-sm" title="Lihat Detail">

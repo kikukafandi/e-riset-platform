@@ -86,28 +86,86 @@
                                     @endif
                                 </div>
                                 <div class="timeline-content">
-                                    <h6>Persetujuan</h6>
+                                    <h6>Persetujuan TTE</h6>
                                     @if ($dokumen->status === 'diterima')
                                         <p class="text-success mb-1">Permohonan disetujui</p>
                                         @if ($dokumen->tanggal_persetujuan)
                                             <small class="text-success">
                                                 <i class="fas fa-check"></i>
-                                                {{ $dokumen->tanggal_persetujuan->format('d M Y') }}
+                                                {{ \Carbon\Carbon::parse($dokumen->tanggal_persetujuan)->format('d M Y') }}
                                             </small>
                                         @endif
                                         @if ($dokumen->deadline_penelitian)
                                             <br><small class="text-info">
                                                 <i class="fas fa-calendar-alt"></i> Deadline:
-                                                {{ $dokumen->deadline_penelitian->format('d M Y') }}
+                                                {{ \Carbon\Carbon::parse($dokumen->deadline_penelitian)->format('d M Y') }}
                                             </small>
                                         @endif
+
+                                        {{-- Surat Persetujuan --}}
+                                        @if ($dokumen->generated_letter_path)
+                                            <div class="mt-3 p-3 bg-success bg-opacity-10 rounded border border-success">
+                                                <h6 class="text-success mb-2">
+                                                    <i class="fas fa-file-signature"></i> Surat Persetujuan Riset
+                                                </h6>
+                                                <p class="mb-2 small text-muted">Surat persetujuan riset Anda telah diterbitkan dan dapat diunduh.</p>
+                                                <a href="{{ Storage::url($dokumen->generated_letter_path) }}" target="_blank" class="btn btn-success btn-sm">
+                                                    <i class="fas fa-download"></i> Unduh Surat Persetujuan
+                                                </a>
+                                                @if($dokumen->letter_generated_at)
+                                                    <br><small class="text-muted mt-2 d-block">
+                                                        <i class="fas fa-clock"></i> Diterbitkan: {{ \Carbon\Carbon::parse($dokumen->letter_generated_at)->format('d M Y, H:i') }}
+                                                    </small>
+                                                @endif
+                                            </div>
+                                        @endif
+
                                     @elseif($dokumen->status === 'ditolak')
                                         <p class="text-danger mb-1">Permohonan ditolak</p>
                                         <small class="text-danger">
                                             <i class="fas fa-times"></i> {{ $dokumen->updated_at->format('d M Y, H:i') }}
                                         </small>
+                                        @if($dokumen->admin_validation_message)
+                                            <div class="mt-2 p-2 bg-danger bg-opacity-10 rounded">
+                                                <small class="text-danger"><strong>Alasan:</strong> {{ $dokumen->admin_validation_message }}</small>
+                                            </div>
+                                        @endif
+
+                                        {{-- Surat Penolakan --}}
+                                        @if ($dokumen->generated_letter_path)
+                                            <div class="mt-3 p-3 bg-danger bg-opacity-10 rounded border border-danger">
+                                                <h6 class="text-danger mb-2">
+                                                    <i class="fas fa-file-alt"></i> Surat Penolakan
+                                                </h6>
+                                                <a href="{{ Storage::url($dokumen->generated_letter_path) }}" target="_blank" class="btn btn-outline-danger btn-sm">
+                                                    <i class="fas fa-download"></i> Unduh Surat Penolakan
+                                                </a>
+                                                @if($dokumen->letter_generated_at)
+                                                    <br><small class="text-muted mt-2 d-block">
+                                                        <i class="fas fa-clock"></i> Diterbitkan: {{ \Carbon\Carbon::parse($dokumen->letter_generated_at)->format('d M Y, H:i') }}
+                                                    </small>
+                                                @endif
+                                            </div>
+                                        @endif
                                     @else
-                                        <p class="text-muted mb-1">Menunggu persetujuan</p>
+                                        <p class="text-muted mb-1">Menunggu persetujuan pejabat</p>
+                                        
+                                        {{-- Status verifikasi --}}
+                                        @if($dokumen->tanggal_validasi_admin)
+                                            <small class="text-success d-block">
+                                                <i class="fas fa-check-circle"></i> Verifikasi berkas: Selesai
+                                            </small>
+                                        @endif
+                                        @if($dokumen->tanggal_verifikasi_pejabat)
+                                            <small class="text-success d-block">
+                                                <i class="fas fa-check-circle"></i> Verifikasi tema: Selesai
+                                            </small>
+                                        @endif
+                                        @if($dokumen->tanggal_validasi_admin && $dokumen->tanggal_verifikasi_pejabat)
+                                            <small class="text-info d-block mt-1">
+                                                <i class="fas fa-hourglass-half"></i> Menunggu TTE pejabat...
+                                            </small>
+                                        @endif
                                     @endif
                                 </div>
                             </div>
@@ -180,28 +238,6 @@
                                 </div>
                             @endif
                         </div>
-
-                        <!-- Generated Letter Section -->
-                        @php
-                            $letterPath = $dokumen->approval_letter_path ?? $dokumen->rejection_letter_path ?? $dokumen->generated_letter_path;
-                        @endphp
-                        @if ($letterPath)
-                            <div class="mt-4">
-                                <div class="alert alert-success">
-                                    <h6><i class="fas fa-file-alt"></i> Surat Persetujuan</h6>
-                                    <p class="mb-2">Surat persetujuan/penolakan riset telah digenerate.</p>
-                                    <a href="{{ route('operiset.letters.show', $dokumen->id) }}" target="_blank"
-                                        class="btn btn-success btn-sm">
-                                        <i class="fas fa-download"></i> Lihat/Unduh Surat TTE
-                                    </a>
-                                    <small class="text-muted d-block mt-1">
-                                        @if($dokumen->letter_generated_at)
-                                            Digenerate pada: {{ $dokumen->letter_generated_at->format('d M Y, H:i') }}
-                                        @endif
-                                    </small>
-                                </div>
-                            </div>
-                        @endif
                     </div>
 
                             <div class="card-footer">

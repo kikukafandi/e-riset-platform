@@ -61,7 +61,7 @@
                         </div>
                         <div class="card-footer text-center py-3">
                             <div class="small">
-                                <a href="{{ route('registerPage') }}">Need an account? Sign up!</a>
+                                <a href="{{ route('register.petugas.view') }}">Belum punya akun? Daftar disini!</a>
                             </div>
                         </div>
                     </div>

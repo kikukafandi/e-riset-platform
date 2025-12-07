@@ -16,7 +16,7 @@ class OperisetLettersController extends Controller
             abort(403, 'Anda tidak berhak mengakses surat ini.');
         }
 
-        $path = $dokumen->approval_letter_path ?: $dokumen->rejection_letter_path;
+        $path = $dokumen->generated_letter_path;
         if (!$path) {
             abort(404, 'Surat belum tersedia.');
         }

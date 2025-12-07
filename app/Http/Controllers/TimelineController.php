@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\DokumenPermohonan;
 use App\Services\PdfLetterService;
+use App\Traits\KantorIsolation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -11,6 +12,8 @@ use Illuminate\Support\Facades\Log;
 
 class TimelineController extends Controller
 {
+    use KantorIsolation;
+
     protected $pdfLetterService;
 
     public function __construct(PdfLetterService $pdfLetterService)
@@ -48,15 +51,16 @@ class TimelineController extends Controller
             ->where('status', 'diterima')
             ->firstOrFail();
 
+        // Validate request
         $request->validate([
-            'paper_file' => 'required|file|mimes:pdf|max:10240', // 10MB max
+            'paper_file' => 'required|file|mimes:pdf|max:10240', // Max 10MB
             'doi_number' => 'nullable|string|max:255'
         ]);
 
-        // Upload paper file
+        // Store the paper file
         $paperPath = $request->file('paper_file')->store('papers', 'public');
 
-        // Update dokumen
+        // Update dokumen with paper info
         $dokumen->update([
             'paper_file' => $paperPath,
             'doi_number' => $request->doi_number,
@@ -64,79 +68,62 @@ class TimelineController extends Controller
             'paper_validation_status' => 'pending'
         ]);
 
-        return redirect()->back()->with('success', 'Paper berhasil disubmit untuk validasi.');
+        return redirect()->route('timeline.index')
+            ->with('success', 'Paper berhasil disubmit! Menunggu validasi dari admin.');
     }
 
-    // Pelaksana validation of paper (first step)
-    public function validatePaper(Request $request, $id)
-    {
-        $dokumen = DokumenPermohonan::findOrFail($id);
-
-        $request->validate([
-            'validation_status' => 'required|in:valid,invalid',
-            'validation_message' => 'nullable|string|max:1000'
-        ]);
-
-        // Update paper validation status
-        $dokumen->update([
-            'paper_validation_status' => $request->validation_status,
-            'paper_validation_message' => $request->validation_message,
-            'paper_validated_at' => now(),
-            'tanggal_validasi_admin' => now()
-        ]);
-
-        // If valid, automatically forward to Eselon IV
-        if ($request->validation_status === 'valid') {
-            $dokumen->update([
-                'admin_validation_status' => 'approved_by_pelaksana',
-                'status' => 'menunggu_verifikasi'
-            ]);
-        } else {
-            $dokumen->update([
-                'admin_validation_status' => 'rejected_by_pelaksana',
-                'status' => 'ditolak'
-            ]);
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => $request->validation_status === 'valid' ? 
-                'Paper divalidasi dan diteruskan ke Eselon IV.' : 
-                'Paper ditolak dan dikembalikan ke pemohon.'
-        ]);
-    }
-
-    // Official verification and letter generation
+    // Official verification and letter generation (TTE by Eselon II/III)
     public function officialVerification(Request $request, $id)
     {
         $dokumen = DokumenPermohonan::findOrFail($id);
+        $user = auth('petugas')->user();
+
+        // Validasi akses kantor
+        if (!$this->canAccessDokumen($dokumen, $user)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki akses ke dokumen dari kantor lain.'
+            ], 403);
+        }
 
         $request->validate([
             'verification_status' => 'required|in:approved,rejected',
             'verification_message' => 'nullable|string|max:1000'
         ]);
 
-        $dokumen->update([
-            'admin_validation_status' => $request->verification_status,
-            'admin_validation_message' => $request->verification_message,
-            'admin_validated_at' => now(),
-            'tanggal_verifikasi_pejabat' => now()
-        ]);
+        if ($request->verification_status === 'approved') {
+            // TTE Approved: Update status to diterima and set approval date
+            $dokumen->update([
+                'status' => 'diterima',
+                'tanggal_persetujuan' => now(),
+                'admin_validation_status' => 'approved',
+                'admin_validation_message' => $request->verification_message,
+                'admin_validated_at' => now(),
+                'tanggal_mulai_riset' => now(),
+                'status_penelitian' => 'sedang_berjalan'
+            ]);
+        } else {
+            // TTE Rejected: Update status to ditolak
+            $dokumen->update([
+                'status' => 'ditolak',
+                'admin_validation_status' => 'rejected',
+                'admin_validation_message' => $request->verification_message,
+                'admin_validated_at' => now()
+            ]);
+        }
 
         // Generate letter automatically
         try {
             if ($request->verification_status === 'approved') {
                 $letterPath = $this->pdfLetterService->generateApprovalLetter($dokumen);
                 $dokumen->update([
-                    'approval_letter_path' => $letterPath,
-                    'letter_generated_at' => now(),
-                    'tanggal_mulai_riset' => now(),
-                    'status_penelitian' => 'sedang_berjalan'
+                    'generated_letter_path' => $letterPath,
+                    'letter_generated_at' => now()
                 ]);
             } else {
                 $letterPath = $this->pdfLetterService->generateRejectionLetter($dokumen);
                 $dokumen->update([
-                    'rejection_letter_path' => $letterPath,
+                    'generated_letter_path' => $letterPath,
                     'letter_generated_at' => now()
                 ]);
             }
@@ -211,24 +198,81 @@ class TimelineController extends Controller
         }
     }
 
-    // Get validation queue for admin
+    // Get validation queue for admin (Pelaksana) - Validasi Paper
     public function validationQueue()
     {
-        $pendingValidations = DokumenPermohonan::where('paper_validation_status', 'pending')
+        $user = auth('petugas')->user();
+        
+        $query = $this->getKantorFilteredQuery($user)
+            ->where('paper_validation_status', 'pending')
             ->whereNotNull('paper_file')
             ->with(['user', 'kantorBeaCukai'])
-            ->paginate(20);
+            ->orderBy('paper_submitted_at', 'asc');  // FIFO
+
+        $pendingValidations = $query->paginate(20);
 
         return view('dashboard.validation-queue', compact('pendingValidations'));
     }
 
-    // Get verification queue for officials
+    // Validate paper by Pelaksana
+    public function validatePaper(Request $request, $id)
+    {
+        $dokumen = DokumenPermohonan::findOrFail($id);
+        $user = auth('petugas')->user();
+
+        // Validasi akses kantor
+        if (!$this->canAccessDokumen($dokumen, $user)) {
+            return redirect()->route('validation.queue')
+                ->with('error', 'Anda tidak memiliki akses ke dokumen dari kantor lain.');
+        }
+
+        $request->validate([
+            'validation_status' => 'required|in:valid,invalid',
+            'validation_message' => 'nullable|string|max:1000'
+        ]);
+
+        if ($request->validation_status === 'valid') {
+            // Paper valid - penelitian selesai
+            $dokumen->update([
+                'paper_validation_status' => 'valid',
+                'paper_validation_message' => $request->validation_message,
+                'paper_validated_at' => now(),
+                'status_penelitian' => 'selesai',  // Penelitian selesai
+                'dapat_perijinan_lagi' => true  // Pemohon bisa ajukan riset baru
+            ]);
+
+            return redirect()->route('validation.queue')
+                ->with('success', 'Paper berhasil divalidasi. Status penelitian: Selesai.');
+        } else {
+            // Paper invalid - perlu resubmit
+            $dokumen->update([
+                'paper_validation_status' => 'invalid',
+                'paper_validation_message' => $request->validation_message,
+                'paper_validated_at' => now()
+                // paper_file tetap ada agar pemohon bisa lihat feedback
+            ]);
+
+            return redirect()->route('validation.queue')
+                ->with('success', 'Paper ditolak. Pemohon akan menerima notifikasi untuk resubmit.');
+        }
+    }
+
+    // Get verification queue for officials (Eselon II/III TTE)
     public function verificationQueue()
     {
-        $pendingVerifications = DokumenPermohonan::where('paper_validation_status', 'valid')
-            ->where('admin_validation_status', 'pending')
+        $user = auth('petugas')->user();
+        
+        // Dokumen yang sudah melewati verifikasi berkas (Pelaksana) dan verifikasi tema (Eselon IV)
+        // Siap untuk TTE oleh Eselon II/III
+        $query = $this->getKantorFilteredQuery($user)
+            ->where('status', 'diproses')
+            ->whereNotNull('tanggal_validasi_admin')  // Sudah verifikasi berkas oleh Pelaksana
+            ->whereNotNull('tanggal_verifikasi_pejabat')  // Sudah verifikasi tema oleh Eselon IV
+            ->whereNull('tanggal_persetujuan')  // Belum di-TTE/disetujui
             ->with(['user', 'kantorBeaCukai'])
-            ->paginate(20);
+            ->orderBy('created_at', 'asc');  // FIFO
+
+        $pendingVerifications = $query->paginate(20);
 
         return view('dashboard.verification-queue', compact('pendingVerifications'));
     }

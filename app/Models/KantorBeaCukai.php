@@ -25,8 +25,35 @@ class KantorBeaCukai extends Model
         'is_active' => 'boolean'
     ];
 
+    /**
+     * Relasi ke dokumen permohonan
+     */
     public function dokumenPermohonans()
     {
         return $this->hasMany(DokumenPermohonan::class, 'kantor_tujuan', 'kode_kantor');
+    }
+
+    /**
+     * Relasi ke petugas
+     */
+    public function petugasList()
+    {
+        return $this->hasMany(Petugas::class, 'kantor_id');
+    }
+
+    /**
+     * Scope untuk filter kantor aktif
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    /**
+     * Scope untuk filter berdasarkan jenis kantor
+     */
+    public function scopeByJenis($query, $jenis)
+    {
+        return $query->where('jenis_kantor', $jenis);
     }
 }

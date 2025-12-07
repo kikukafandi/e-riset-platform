@@ -7,69 +7,178 @@
                 <li class="breadcrumb-item active">Dashboard Petugas</li>
             </ol>
 
-            {{-- Statistik --}}
+            {{-- Statistik Utama --}}
             <div class="row">
                 <div class="col-xl-3 col-md-6">
-                    <div class="card bg-primary text-white mb-4">
+                    <div class="card bg-primary text-white mb-4 shadow">
                         <div class="card-body">
-                            Total Permohonan
-                            <h4 id="stat-total">{{ $total }}</h4>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="text-white-75 small">Total Permohonan</div>
+                                    <div class="h2 mb-0">{{ $total }}</div>
+                                </div>
+                                <div class="text-white-50">
+                                    <i class="fas fa-folder fa-2x"></i>
+                                </div>
+                            </div>
                         </div>
-                        <div class="card-footer d-flex align-items-center justify-content-between">
-                            <span>Lihat Detail</span>
-                            <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                        <div class="card-footer d-flex align-items-center justify-content-between bg-transparent border-top-0">
+                            <small class="text-white">Semua Permohonan</small>
+                            <i class="fas fa-clipboard-list text-white-50"></i>
                         </div>
                     </div>
                 </div>
                 <div class="col-xl-3 col-md-6">
-                    <div class="card bg-warning text-white mb-4">
+                    <div class="card bg-warning text-white mb-4 shadow">
                         <div class="card-body">
-                            Permohonan Pending
-                            <h4 id="stat-pending">{{ $pending }}</h4>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="text-white-75 small">Sedang Diproses</div>
+                                    <div class="h2 mb-0">{{ $pending }}</div>
+                                </div>
+                                <div class="text-white-50">
+                                    <i class="fas fa-hourglass-half fa-2x"></i>
+                                </div>
+                            </div>
                         </div>
-                        <div class="card-footer d-flex align-items-center justify-content-between">
-                            <span>Lihat Detail</span>
-                            <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                        <div class="card-footer d-flex align-items-center justify-content-between bg-transparent border-top-0">
+                            <small class="text-white">Menunggu Verifikasi</small>
+                            <i class="fas fa-tasks text-white-50"></i>
                         </div>
                     </div>
                 </div>
                 <div class="col-xl-3 col-md-6">
-                    <div class="card bg-success text-white mb-4">
+                    <div class="card bg-success text-white mb-4 shadow">
                         <div class="card-body">
-                            Permohonan Disetujui
-                            <h4 id="stat-disetujui">{{ $disetujui }}</h4>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="text-white-75 small">Disetujui</div>
+                                    <div class="h2 mb-0">{{ $disetujui }}</div>
+                                </div>
+                                <div class="text-white-50">
+                                    <i class="fas fa-check-circle fa-2x"></i>
+                                </div>
+                            </div>
                         </div>
-                        <div class="card-footer d-flex align-items-center justify-content-between">
-                            <span>Lihat Detail</span>
-                            <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                        <div class="card-footer d-flex align-items-center justify-content-between bg-transparent border-top-0">
+                            <small class="text-white">Sudah Disetujui</small>
+                            <i class="fas fa-thumbs-up text-white-50"></i>
                         </div>
                     </div>
                 </div>
                 <div class="col-xl-3 col-md-6">
-                    <div class="card bg-danger text-white mb-4">
+                    <div class="card bg-danger text-white mb-4 shadow">
                         <div class="card-body">
-                            Permohonan Ditolak
-                            <h4 id="stat-ditolak">{{ $ditolak }}</h4>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="text-white-75 small">Ditolak</div>
+                                    <div class="h2 mb-0">{{ $ditolak }}</div>
+                                </div>
+                                <div class="text-white-50">
+                                    <i class="fas fa-times-circle fa-2x"></i>
+                                </div>
+                            </div>
                         </div>
-                        <div class="card-footer d-flex align-items-center justify-content-between">
-                            <span>Lihat Detail</span>
-                            <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-md-6">
-                    <div class="card bg-secondary text-white mb-4">
-                        <div class="card-body">
-                            Dokumen Tidak Lengkap
-                            <h4 id="stat-dokumenTidakLengkap">{{ $dokumenTidakLengkap }}</h4>
-                        </div>
-                        <div class="card-footer d-flex align-items-center justify-content-between">
-                            <span>Lihat Detail</span>
-                            <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                        <div class="card-footer d-flex align-items-center justify-content-between bg-transparent border-top-0">
+                            <small class="text-white">Tidak Disetujui</small>
+                            <i class="fas fa-ban text-white-50"></i>
                         </div>
                     </div>
                 </div>
             </div>
+
+            {{-- Statistik Tambahan --}}
+            <div class="row">
+                <div class="col-xl-3 col-md-6">
+                    <div class="card border-left-info mb-4 shadow h-100">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                        Peneliti Pegawai</div>
+                                    <div class="h4 mb-0 font-weight-bold text-gray-800">{{ $pegawaiCount }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-user-tie fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="card border-left-secondary mb-4 shadow h-100">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">
+                                        Peneliti Non-Pegawai</div>
+                                    <div class="h4 mb-0 font-weight-bold text-gray-800">{{ $nonPegawaiCount }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-user-graduate fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="card border-left-primary mb-4 shadow h-100">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                        Penelitian Berjalan</div>
+                                    <div class="h4 mb-0 font-weight-bold text-gray-800">{{ $sedangBerjalanCount }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-spinner fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="card border-left-success mb-4 shadow h-100">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                        Penelitian Selesai</div>
+                                    <div class="h4 mb-0 font-weight-bold text-gray-800">{{ $completedCount }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-check-double fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Alert untuk Overdue --}}
+            @if($overdueCount > 0)
+            <div class="row">
+                <div class="col-12">
+                    <div class="alert alert-danger shadow" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Perhatian!</strong> Terdapat <strong>{{ $overdueCount }}</strong> penelitian yang melewati deadline dan belum selesai.
+                        <a href="#" class="alert-link">Lihat Detail</a>
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            {{-- Dokumen Tidak Lengkap Alert --}}
+            @if($dokumenTidakLengkap > 0)
+            <div class="row">
+                <div class="col-12">
+                    <div class="alert alert-warning shadow" role="alert">
+                        <i class="fas fa-file-excel me-2"></i>
+                        Terdapat <strong>{{ $dokumenTidakLengkap }}</strong> permohonan dengan dokumen tidak lengkap yang perlu ditindaklanjuti.
+                    </div>
+                </div>
+            </div>
+            @endif
 
 
             <div class="card mt-4 mb-4">
@@ -117,16 +226,50 @@
                                     </td>
                                     <td>{{ $permohonan->user->instansi ?? 'Peneliti Mandiri' }}</td>
                                     <td>
-                                        <select class="form-select form-select-sm status-dropdown
-                                            {{ $permohonan->status === 'diproses' ? 'bg-warning text-dark' : 
-                                               ($permohonan->status === 'diterima' ? 'bg-success text-white' : 
-                                                ($permohonan->status === 'ditolak' ? 'bg-danger text-white' : 'bg-secondary text-white')) }}"
-                                            data-id="{{ $permohonan->id }}">
-                                            <option value="dokumen_tidak_lengkap" {{ $permohonan->status == 'dokumen_tidak_lengkap' ? 'selected' : '' }}>Dokumen Tidak Lengkap</option>
-                                            <option value="diproses" {{ $permohonan->status == 'diproses' ? 'selected' : '' }}>Diproses</option>
-                                            <option value="diterima" {{ $permohonan->status == 'diterima' ? 'selected' : '' }}>Diterima</option>
-                                            <option value="ditolak" {{ $permohonan->status == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
-                                        </select>
+                                        @php
+                                            $statusLabels = [
+                                                'diproses' => 'Diproses',
+                                                'diterima' => 'Diterima',
+                                                'ditolak' => 'Ditolak',
+                                                'dokumen_tidak_lengkap' => 'Dokumen Tidak Lengkap',
+                                            ];
+                                            $badgeClass = match($permohonan->status) {
+                                                'diproses' => 'bg-warning text-dark',
+                                                'diterima' => 'bg-success',
+                                                'ditolak' => 'bg-danger',
+                                                'dokumen_tidak_lengkap' => 'bg-secondary',
+                                                default => 'bg-light text-dark',
+                                            };
+                                            // Dropdown sesuai role petugas yang login
+                                            $allowedTransitions = [];
+                                            $petugasRole = auth('petugas')->user()->role ?? null;
+                                            $isEselonTTE = in_array($petugasRole, ['eselon_ii', 'eselon_iii']);
+                                            if ($permohonan->status === 'diproses') {
+                                                if ($petugasRole === 'pelaksana') {
+                                                    // Pelaksana: verifikasi berkas, bisa tandai dokumen tidak lengkap
+                                                    $allowedTransitions = ['verifikasi_berkas' => 'Verifikasi Berkas ✓', 'dokumen_tidak_lengkap' => 'Dokumen Tidak Lengkap'];
+                                                } elseif ($petugasRole === 'eselon_iv') {
+                                                    // Eselon IV: verifikasi tema & narasumber
+                                                    $allowedTransitions = ['verifikasi_tema' => 'Verifikasi Tema & Narasumber ✓', 'ditolak' => 'Tolak'];
+                                                }
+                                                // Eselon II/III: tidak pakai dropdown, redirect ke halaman TTE
+                                            }
+                                        @endphp
+                                        @if($isEselonTTE && $permohonan->status === 'diproses')
+                                            {{-- Eselon II/III: Button untuk TTE di halaman terpisah --}}
+                                            <a href="{{ route('verification.queue') }}" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-signature"></i> Proses TTE
+                                            </a>
+                                        @elseif(count($allowedTransitions) > 0)
+                                            <select class="form-select form-select-sm status-dropdown {{ $badgeClass }}" data-id="{{ $permohonan->id }}">
+                                                <option value="" disabled selected>-- Pilih Aksi --</option>
+                                                @foreach($allowedTransitions as $value => $label)
+                                                    <option value="{{ $value }}">{{ $label }}</option>
+                                                @endforeach
+                                            </select>
+                                        @else
+                                            <span class="badge {{ $badgeClass }}">{{ $statusLabels[$permohonan->status] ?? ucfirst(str_replace('_', ' ', $permohonan->status)) }}</span>
+                                        @endif
                                     </td>
                                     <td>
                                         @if($permohonan->paper_file)

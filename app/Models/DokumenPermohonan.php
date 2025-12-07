@@ -5,6 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
+use App\Helpers\ResearchStatus;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\FacadesLog;
 
 class DokumenPermohonan extends Model
 {
@@ -15,7 +18,6 @@ class DokumenPermohonan extends Model
     protected $casts = [
         'tanggal_persetujuan' => 'date',
         'deadline_penelitian' => 'date',
-        'dapat_perijinan_lagi' => 'boolean',
         'tanggal_draft' => 'datetime',
         'tanggal_submit' => 'datetime',
         'tanggal_validasi_admin' => 'datetime',
@@ -24,7 +26,8 @@ class DokumenPermohonan extends Model
         'paper_submitted_at' => 'datetime',
         'paper_validated_at' => 'datetime',
         'admin_validated_at' => 'datetime',
-        'letter_generated_at' => 'datetime'
+        'letter_generated_at' => 'datetime',
+        'dapat_perijinan_lagi' => 'boolean',
     ];
 
     public function user(){
@@ -51,14 +54,32 @@ class DokumenPermohonan extends Model
         return Carbon::now()->isAfter($this->deadline_penelitian);
     }
 
-    // Update research status based on deadline
-    public function updateResearchStatus()
+
+    // Validasi transisi status sesuai role
+    public function canTransition($toStatus, $user)
     {
-        if ($this->isOverdue() && $this->status_penelitian !== 'selesai') {
-            $this->status_penelitian = 'terlambat';
-            $this->dapat_perijinan_lagi = false;
-            $this->save();
+        $role = $user->role ?? null;
+        $fromStatus = $this->status;
+        return ResearchStatus::canTransition($fromStatus, $toStatus, $role);
+    }
+
+    // Helper untuk update status dengan validasi
+    public function updateStatusWithRole($toStatus, $user, $extra = [])
+    {
+        if (!$this->canTransition($toStatus, $user)) {
+            throw new \Exception('Transisi status tidak valid atau role tidak sesuai');
         }
+        $this->status = $toStatus;
+        // Set tanggal persetujuan dan deadline saat status menjadi 'diterima'
+        if ($toStatus === ResearchStatus::DITERIMA) {
+            $this->tanggal_persetujuan = Carbon::now();
+            $this->deadline_penelitian = Carbon::now()->addYear();
+            $this->status_penelitian = 'sedang_berjalan';
+        }
+        foreach ($extra as $key => $val) {
+            $this->$key = $val;
+        }
+        $this->save();
     }
 
     // Scope for filtering by employee/non-employee

@@ -15,10 +15,12 @@ return new class extends Migration
             $table->id();
             $table->string('nama');
             $table->string('jabatan');
-            $table->string('nip');
+            $table->string('nip')->unique();
             $table->string('email')->unique();
             $table->string('password');
-            $table->enum('role',['super_user','pelaksana','eselon_iv','eselon_iii','eselon_ii']);
+            $table->enum('role', ['super_user', 'pelaksana', 'eselon_iv', 'eselon_iii', 'eselon_ii']);
+            
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }

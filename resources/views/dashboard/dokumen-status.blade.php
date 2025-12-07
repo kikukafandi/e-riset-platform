@@ -36,16 +36,28 @@
                                     <td>{{ $permohonan->jenis_permohonan_data }}</td>
                                     <td>
                                         @php
-                                            $statusClass = match($permohonan->status) {
-                                                'diproses' => 'bg-warning text-dark',
-                                                'diterima' => 'bg-success text-white',
-                                                'ditolak' => 'bg-danger text-white',
-                                                'dokumen_tidak_lengkap' => 'bg-secondary text-white',
-                                                default => 'bg-light text-dark'
+                                            $statusLabels = [
+                                                \App\Helpers\ResearchStatus::SUBMITTED => 'Diajukan',
+                                                \App\Helpers\ResearchStatus::VERIFIED_DOCUMENTS => 'Verifikasi Dokumen',
+                                                \App\Helpers\ResearchStatus::VERIFIED_THEME => 'Verifikasi Topik',
+                                                \App\Helpers\ResearchStatus::CONFIRMED_DATA_NARASUMBER => 'Konfirmasi Data/Narasumber',
+                                                \App\Helpers\ResearchStatus::APPROVED => 'Disetujui',
+                                                \App\Helpers\ResearchStatus::RESEARCH_PERIOD => 'Periode Riset',
+                                                \App\Helpers\ResearchStatus::SUBMITTED_PAPER => 'Paper Dikirim',
+                                                \App\Helpers\ResearchStatus::COMPLETED => 'Selesai',
+                                            ];
+                                            $badgeClass = match($permohonan->status) {
+                                                \App\Helpers\ResearchStatus::SUBMITTED => 'bg-info',
+                                                \App\Helpers\ResearchStatus::VERIFIED_DOCUMENTS, \App\Helpers\ResearchStatus::VERIFIED_THEME, \App\Helpers\ResearchStatus::CONFIRMED_DATA_NARASUMBER => 'bg-warning text-dark',
+                                                \App\Helpers\ResearchStatus::APPROVED => 'bg-success',
+                                                \App\Helpers\ResearchStatus::RESEARCH_PERIOD => 'bg-primary',
+                                                \App\Helpers\ResearchStatus::SUBMITTED_PAPER => 'bg-secondary',
+                                                \App\Helpers\ResearchStatus::COMPLETED => 'bg-success',
+                                                default => 'bg-light text-dark',
                                             };
                                         @endphp
-                                        <span class="badge {{ $statusClass }}">
-                                            {{ ucfirst(str_replace('_', ' ', $permohonan->status)) }}
+                                        <span class="badge {{ $badgeClass }}">
+                                            {{ $statusLabels[$permohonan->status] ?? ucfirst(str_replace('_', ' ', $permohonan->status)) }}
                                         </span>
                                     </td>
                                     <td>{{ $permohonan->created_at->format('d M Y') }}</td>
