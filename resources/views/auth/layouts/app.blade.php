@@ -8,9 +8,14 @@
         <meta name="author" content="" />
         <title>@yield(section: 'title')</title>
         <link href="css/styles.css" rel="stylesheet" />
+         <style>
+            .bg-navy{
+                background-color: #114189 !important;
+            }
+        </style>
         <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
     </head>
-    <body class="bg-primary">
+    <body class="bg-navy">
         <div id="layoutAuthentication">
             <div id="layoutAuthentication_content">
                 @yield(section: 'content')
