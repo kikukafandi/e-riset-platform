@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\DokumenPermohonan;
 use App\Services\PdfLetterService;
+use App\Traits\KantorIsolation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -11,6 +12,8 @@ use Illuminate\Support\Facades\Log;
 
 class TimelineController extends Controller
 {
+    use KantorIsolation;
+
     protected $pdfLetterService;
 
     public function __construct(PdfLetterService $pdfLetterService)
@@ -73,6 +76,15 @@ class TimelineController extends Controller
     public function officialVerification(Request $request, $id)
     {
         $dokumen = DokumenPermohonan::findOrFail($id);
+        $user = auth('petugas')->user();
+
+        // Validasi akses kantor
+        if (!$this->canAccessDokumen($dokumen, $user)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki akses ke dokumen dari kantor lain.'
+            ], 403);
+        }
 
         $request->validate([
             'verification_status' => 'required|in:approved,rejected',
@@ -189,11 +201,15 @@ class TimelineController extends Controller
     // Get validation queue for admin (Pelaksana) - Validasi Paper
     public function validationQueue()
     {
-        $pendingValidations = DokumenPermohonan::where('paper_validation_status', 'pending')
+        $user = auth('petugas')->user();
+        
+        $query = $this->getKantorFilteredQuery($user)
+            ->where('paper_validation_status', 'pending')
             ->whereNotNull('paper_file')
             ->with(['user', 'kantorBeaCukai'])
-            ->orderBy('paper_submitted_at', 'asc')  // FIFO
-            ->paginate(20);
+            ->orderBy('paper_submitted_at', 'asc');  // FIFO
+
+        $pendingValidations = $query->paginate(20);
 
         return view('dashboard.validation-queue', compact('pendingValidations'));
     }
@@ -202,6 +218,13 @@ class TimelineController extends Controller
     public function validatePaper(Request $request, $id)
     {
         $dokumen = DokumenPermohonan::findOrFail($id);
+        $user = auth('petugas')->user();
+
+        // Validasi akses kantor
+        if (!$this->canAccessDokumen($dokumen, $user)) {
+            return redirect()->route('validation.queue')
+                ->with('error', 'Anda tidak memiliki akses ke dokumen dari kantor lain.');
+        }
 
         $request->validate([
             'validation_status' => 'required|in:valid,invalid',
@@ -237,15 +260,19 @@ class TimelineController extends Controller
     // Get verification queue for officials (Eselon II/III TTE)
     public function verificationQueue()
     {
+        $user = auth('petugas')->user();
+        
         // Dokumen yang sudah melewati verifikasi berkas (Pelaksana) dan verifikasi tema (Eselon IV)
         // Siap untuk TTE oleh Eselon II/III
-        $pendingVerifications = DokumenPermohonan::where('status', 'diproses')
+        $query = $this->getKantorFilteredQuery($user)
+            ->where('status', 'diproses')
             ->whereNotNull('tanggal_validasi_admin')  // Sudah verifikasi berkas oleh Pelaksana
             ->whereNotNull('tanggal_verifikasi_pejabat')  // Sudah verifikasi tema oleh Eselon IV
             ->whereNull('tanggal_persetujuan')  // Belum di-TTE/disetujui
             ->with(['user', 'kantorBeaCukai'])
-            ->orderBy('created_at', 'asc')  // FIFO
-            ->paginate(20);
+            ->orderBy('created_at', 'asc');  // FIFO
+
+        $pendingVerifications = $query->paginate(20);
 
         return view('dashboard.verification-queue', compact('pendingVerifications'));
     }

@@ -178,7 +178,11 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch(`{{ route("statistics.office.destinations") }}?year=${year}`)
             .then(response => response.json())
             .then(data => {
+                console.log('Office stats data:', data); // Debug log
                 updateOfficeTable(data.office_stats);
+            })
+            .catch(error => {
+                console.error('Error loading office stats:', error);
             });
     }
 
@@ -245,14 +249,25 @@ document.addEventListener('DOMContentLoaded', function() {
         const tbody = document.querySelector('#officeStatsTable tbody');
         tbody.innerHTML = '';
         
+        if (!data || data.length === 0) {
+            const row = tbody.insertRow();
+            row.innerHTML = `
+                <td colspan="5" class="text-center text-muted py-4">
+                    <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+                    Tidak ada data statistik kantor untuk tahun ini
+                </td>
+            `;
+            return;
+        }
+        
         data.forEach(office => {
             const row = tbody.insertRow();
             row.innerHTML = `
-                <td>${office.kode_kantor}</td>
-                <td>${office.nama_kantor}</td>
-                <td>${office.provinsi}</td>
-                <td>${office.kota}</td>
-                <td><span class="badge badge-primary">${office.total_applications}</span></td>
+                <td>${office.kode_kantor || '-'}</td>
+                <td>${office.nama_kantor || '-'}</td>
+                <td>${office.provinsi || '-'}</td>
+                <td>${office.kota || '-'}</td>
+                <td><span class="badge bg-primary text-white">${office.total_applications || 0}</span></td>
             `;
         });
     }

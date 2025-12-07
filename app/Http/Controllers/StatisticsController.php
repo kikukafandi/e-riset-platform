@@ -147,28 +147,38 @@ class StatisticsController extends Controller
         $year = $request->get('year', Carbon::now()->year);
         $month = $request->get('month');
 
-        $query = DokumenPermohonan::with('kantorBeaCukai')
-            ->whereNotNull('kantor_tujuan')
+        // Build query
+        $query = DokumenPermohonan::whereNotNull('kantor_tujuan')
             ->whereYear('created_at', $year);
 
         if ($month) {
             $query->whereMonth('created_at', $month);
         }
 
-        $officeStats = $query->select('kantor_tujuan', DB::raw('count(*) as total'))
+        // Get aggregated data
+        $rawStats = $query->select('kantor_tujuan', DB::raw('count(*) as total'))
             ->groupBy('kantor_tujuan')
             ->orderBy('total', 'desc')
-            ->get()
-            ->map(function ($item) {
-                $office = KantorBeaCukai::where('kode_kantor', $item->kantor_tujuan)->first();
-                return [
-                    'kode_kantor' => $item->kantor_tujuan,
-                    'nama_kantor' => $office ? $office->nama_kantor : 'Unknown',
-                    'provinsi' => $office ? $office->provinsi : 'Unknown',
-                    'kota' => $office ? $office->kota : 'Unknown',
-                    'total_applications' => $item->total
-                ];
-            });
+            ->get();
+
+        // Load kantor details and format response
+        $officeStats = $rawStats->map(function ($item) {
+            $office = KantorBeaCukai::find($item->kantor_tujuan);
+            
+            if (!$office) {
+                return null; // Skip non-existent offices
+            }
+            
+            return [
+                'kode_kantor' => $office->kode_kantor,
+                'nama_kantor' => $office->nama_kantor,
+                'provinsi' => $office->provinsi,
+                'kota' => $office->kota,
+                'total_applications' => (int) $item->total
+            ];
+        })
+        ->filter() // Remove null entries
+        ->values(); // Reset array keys
 
         return response()->json([
             'office_stats' => $officeStats,

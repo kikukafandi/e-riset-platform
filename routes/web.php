@@ -38,6 +38,8 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 */
 Route::get('/login-petugas', [PetugasController::class, 'loginPetugasView'])->name('login.petugas.view');
 Route::post('/login-petugas', [PetugasController::class, 'loginPetugas'])->name('login.petugas');
+Route::get('/register-petugas', [PetugasController::class, 'registerPetugasView'])->name('register.petugas.view');
+Route::post('/register-petugas', [PetugasController::class, 'registerPetugas'])->name('register.petugas');
 Route::post('/logout-petugas', [PetugasController::class, 'logoutPetugas'])->name('logout.petugas');
 
 /*
@@ -83,6 +85,7 @@ Route::middleware(['CekLogin:petugas'])->group(function () {
     Route::get('/manage-petugas/{id}/edit', [PetugasController::class, 'edit'])->name('manage.petugas.edit');
     Route::put('/manage-petugas/{id}', [PetugasController::class, 'update'])->name('manage.petugas.update');
     Route::delete('/manage-petugas/{id}', [PetugasController::class, 'destroy'])->name('manage.petugas.destroy');
+    Route::patch('/manage-petugas/{id}/toggle-active', [PetugasController::class, 'toggleActive'])->name('manage.petugas.toggle-active');
 
     Route::get('/petugas/permohonan/total', [DokumenPermohonanController::class, 'total'])->name('permohonan.total');
     Route::get('/petugas/permohonan/pending', [DokumenPermohonanController::class, 'pending'])->name('permohonan.pending');
