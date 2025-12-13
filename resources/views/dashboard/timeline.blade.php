@@ -44,6 +44,9 @@
                                 </div>
                                 <div class="timeline-content">
                                     <h6>Draft Permohonan</h6>
+                                    @if ($dokumen->service_number)
+                                        <p class="text-muted mb-1"><strong>Nomor Layanan:</strong> {{ $dokumen->service_number }}</p>
+                                    @endif
                                     <p class="text-muted mb-1">Permohonan telah dibuat</p>
                                     @if ($dokumen->created_at)
                                         <small class="text-success">

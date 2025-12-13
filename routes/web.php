@@ -9,9 +9,44 @@ use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\KantorBeaCukaiController;
 use App\Http\Controllers\TimelineController;
 use Illuminate\Support\Facades\Route;
+use App\Models\DokumenPermohonan;
+use App\Models\User;
+use App\Helpers\ResearchStatus;
 
 Route::get('/', function () {
-    return view('welcome');
+    $activeRequests = DokumenPermohonan::whereIn('status', [ResearchStatus::DIPROSES, ResearchStatus::DITERIMA])
+        ->where(function ($q) {
+            $q->whereNull('status_penelitian')->orWhere('status_penelitian', '!=', 'selesai');
+        })
+        ->count();
+
+    $averageSlaDays = DokumenPermohonan::whereNotNull('tanggal_persetujuan')
+        ->whereColumn('tanggal_persetujuan', '>=', 'created_at')
+        ->selectRaw('AVG(DATEDIFF(tanggal_persetujuan, created_at)) as avg_days')
+        ->value('avg_days');
+
+    $institutionsServed = User::where(function ($q) {
+            $q->whereNotNull('instansi')->where('instansi', '<>', '');
+            $q->orWhere(function ($q2) {
+                $q2->whereNotNull('kampus')->where('kampus', '<>', '');
+            });
+        })
+        ->selectRaw("COUNT(DISTINCT COALESCE(NULLIF(instansi, ''), NULLIF(kampus, ''))) as total")
+        ->value('total');
+
+    $archivedDocs = DokumenPermohonan::where(function ($q) {
+            $q->whereNotNull('generated_letter_path')->orWhereNotNull('file_paper_pdf');
+        })
+        ->count();
+
+    return view('welcome', [
+        'metrics' => [
+            'active_requests' => $activeRequests,
+            'average_sla_days' => $averageSlaDays,
+            'institutions_served' => $institutionsServed,
+            'archived_docs' => $archivedDocs,
+        ],
+    ]);
 });
 // Operiset (applicant) access to signed letters
 Route::middleware(['auth'])->group(function () {

@@ -39,24 +39,12 @@
                         <th>Status</th>
                         <td>
                             @php
-                                use App\Helpers\ResearchStatus;
-                                $statusLabels = [
-                                    ResearchStatus::SUBMITTED => 'Diajukan',
-                                    ResearchStatus::VERIFIED_DOCUMENTS => 'Verifikasi Dokumen',
-                                    ResearchStatus::VERIFIED_THEME => 'Verifikasi Topik',
-                                    ResearchStatus::CONFIRMED_DATA_NARASUMBER => 'Konfirmasi Data/Narasumber',
-                                    ResearchStatus::APPROVED => 'Disetujui',
-                                    ResearchStatus::RESEARCH_PERIOD => 'Periode Riset',
-                                    ResearchStatus::SUBMITTED_PAPER => 'Paper Dikirim',
-                                    ResearchStatus::COMPLETED => 'Selesai',
-                                ];
+                                $statusLabels = \App\Helpers\ResearchStatus::labels();
                                 $badgeClass = match($dokumen->status) {
-                                    ResearchStatus::SUBMITTED => 'bg-info',
-                                    ResearchStatus::VERIFIED_DOCUMENTS, ResearchStatus::VERIFIED_THEME, ResearchStatus::CONFIRMED_DATA_NARASUMBER => 'bg-warning text-dark',
-                                    ResearchStatus::APPROVED => 'bg-success',
-                                    ResearchStatus::RESEARCH_PERIOD => 'bg-primary',
-                                    ResearchStatus::SUBMITTED_PAPER => 'bg-secondary',
-                                    ResearchStatus::COMPLETED => 'bg-success',
+                                    \App\Helpers\ResearchStatus::DIPROSES => 'bg-info',
+                                    \App\Helpers\ResearchStatus::DOKUMEN_TIDAK_LENGKAP => 'bg-warning text-dark',
+                                    \App\Helpers\ResearchStatus::DITERIMA => 'bg-success',
+                                    \App\Helpers\ResearchStatus::DITOLAK => 'bg-danger',
                                     default => 'bg-light text-dark',
                                 };
                             @endphp
