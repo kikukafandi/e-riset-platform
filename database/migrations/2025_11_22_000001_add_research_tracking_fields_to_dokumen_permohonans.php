@@ -12,6 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('dokumen_permohonans', function (Blueprint $table) {
+            // Nomor layanan (format NNNN-YYYY)
+            $table->string('service_number', 11)->nullable()->unique()->after('status');
             $table->date('tanggal_persetujuan')->nullable()->after('status');
             $table->date('deadline_penelitian')->nullable()->after('tanggal_persetujuan');
             $table->string('doi_number')->nullable()->after('deadline_penelitian');

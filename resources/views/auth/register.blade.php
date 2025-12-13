@@ -123,8 +123,18 @@
                                     </div>
 
                                     <div class="form-floating mb-3">
-                                        <input type="text" class="form-control @error('npwp') is-invalid @enderror" name="npwp" placeholder="NPWP" value="{{ old('npwp') }}">
-                                        <label>NPWP</label>
+                                        <select class="form-select" name="is_pegawai">
+                                            <option value="">Status</option>
+                                            <option value="ya" {{ old('is_pegawai')=='ya' ? 'selected' : '' }}>Pegawai Bea Cukai</option>
+                                            <option value="tidak" {{ old('is_pegawai')=='tidak' ? 'selected' : '' }}>Bukan Pegawai Bea Cukai</option>
+                                        </select>
+                                        <label>Status Kepegawaian</label>
+                                    </div>
+
+                                    <div class="form-floating mb-3">
+                                        <input type="text" class="form-control @error('npwp') is-invalid @enderror" name="npwp" placeholder="NIP (maks 18 digit)" value="{{ old('npwp') }}" inputmode="numeric" pattern="^[0-9]{1,18}$" maxlength="18">
+                                        <label>NIP (maks 18 digit)</label>
+                                        <small class="text-muted">Diisi jika memilih Pegawai Bea Cukai</small>
                                         @error('npwp') <small class="text-danger">{{ $message }}</small> @enderror
                                     </div>
 

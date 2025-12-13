@@ -134,6 +134,12 @@ class DokumenPermohonanController extends Controller
 
         try {
             // 7. Simpan ke Database
+            // Generate service number: 4digit-year (NNNN-YYYY)
+            $year = now()->year;
+            $countThisYear = DokumenPermohonan::whereYear('created_at', $year)->count() + 1;
+            $serviceNumber = str_pad((string)$countThisYear, 4, '0', STR_PAD_LEFT) . '-' . $year;
+            $dataToSave['service_number'] = $serviceNumber;
+
             $dokumen = DokumenPermohonan::create($dataToSave);
 
             // Log successful creation

@@ -65,7 +65,7 @@ class AuthController extends Controller
                 'password' => 'required|string|min:6|confirmed',
             ]);
         } else {
-            $validated = $request->validate([
+            $rules = [
                 'nama_lengkap' => 'required|string|max:255',
                 'nik' => 'required|string|max:50|unique:users,nik',
                 'npwp' => 'nullable|string|max:50',
@@ -75,6 +75,16 @@ class AuthController extends Controller
                 'sponsor_riset' => 'nullable|string|max:255',
                 'email' => 'required|email|max:255|unique:users,email',
                 'password' => 'required|string|min:6|confirmed',
+            ];
+
+            // Validasi NIP maksimal 18 digit jika pegawai Bea Cukai
+            if ($request->input('is_pegawai') === 'ya') {
+                $rules['npwp'] = ['required','regex:/^[0-9]{1,18}$/'];
+            }
+
+            $validated = $request->validate($rules, [
+                'npwp.required' => 'NIP wajib diisi untuk Pegawai Bea Cukai.',
+                'npwp.regex' => 'NIP harus berupa angka maksimal 18 digit.',
             ]);
         }
 
@@ -84,6 +94,7 @@ class AuthController extends Controller
             'email' => $validated['email'],
             'kategori' => $kategori,
             'nik' => $validated['nik'],
+            // Catatan: kolom 'npwp' digunakan untuk menyimpan NIP jika status Pegawai Bea Cukai
             'npwp' => $validated['npwp'] ?? null,
             'no_telepon' => $validated['no_telepon'] ?? null,
             'alamat' => $validated['alamat'] ?? null,
