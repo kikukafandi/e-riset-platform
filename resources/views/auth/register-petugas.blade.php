@@ -154,7 +154,7 @@
                                             <option value="">-- Pilih Kantor --</option>
                                             @foreach($kantorList as $kantor)
                                                 <option value="{{ $kantor->id }}" {{ old('kantor_id') == $kantor->id ? 'selected' : '' }}>
-                                                    {{ $kantor->nama_kantor }} ({{ strtoupper($kantor->jenis_kantor) }})
+                                                    {{ $kantor->nama_kantor }} 
                                                 </option>
                                             @endforeach
                                         </select>
