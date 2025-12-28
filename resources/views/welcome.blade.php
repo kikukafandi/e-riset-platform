@@ -194,11 +194,10 @@
             </div>
 
             <div class="p-6 md:p-10 bg-white">
-
                 <div id="tab-info" class="tab-content active">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-start">
-                        <div class="relative group w-full rounded-xl overflow-hidden shadow-lg">
-                            <img src="https://dummyimage.com/600x400/eee/aaa&text=Gedung+DJP" alt="Gedung DJP"
+                        <div class="relative group w-full rounded-xl overflow-hidden">
+                            <img src="https://eriset.pajak.go.id/image/content-1.svg" alt="Gedung DJP"
                                 class="w-full h-auto object-cover transform group-hover:scale-105 transition duration-500">
                         </div>
 
@@ -374,7 +373,7 @@
                             Silakan datang langsung ke Perpustakaan DJP jika ingin membaca hasil riset. Daftar hasil
                             riset dapat dilihat pada:
                         </p>
-                        <a href="https://perpustakaan.pajak.go.id" target="_blank"
+                        <a href="https://edukasi.pajak.go.id/kunjung-perpus/riset" target="_blank"
                             class="inline-flex items-center gap-3 px-8 py-4 bg-secondary text-primary font-bold rounded-full hover:bg-yellow-400 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1">
                             <span>Kunjungi Perpustakaan DJP</span>
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
