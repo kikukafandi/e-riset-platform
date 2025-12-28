@@ -22,9 +22,9 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             PetugasSeeder::class,
             TopikRisetSeeder::class,
+            KantorBeaCukaiSeeder::class,
             DokumenPermohonanSeeder::class,
             LaporanSeeder::class,
-            KantorBeaCukaiSeeder::class,
         ]);
     }
 }
