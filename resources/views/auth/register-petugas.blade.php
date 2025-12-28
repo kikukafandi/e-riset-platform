@@ -41,7 +41,7 @@
             <!-- Logo & Header -->
             <div class="text-center mb-8">
                 <div class="flex items-center justify-center gap-2 mb-4">
-                    <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-navy text-white font-bold text-lg">DJ</div>
+                    <div class="flex h-12 w-12 items-center justify-center rounded-lg text-white font-bold text-lg"><img src="{{ asset('storage/img/Lambang_Bea_dan_Cukai.png') }}" alt="DJBC Logo" class="h-10 w-10 rounded-lg object-cover"></div>
                     <div class="text-left">
                         <p class="text-xs font-semibold text-gold tracking-wide">DIREKTORAT JENDERAL</p>
                         <p class="text-base font-bold text-navy leading-tight">Bea dan Cukai</p>
@@ -154,7 +154,7 @@
                                             <option value="">-- Pilih Kantor --</option>
                                             @foreach($kantorList as $kantor)
                                                 <option value="{{ $kantor->id }}" {{ old('kantor_id') == $kantor->id ? 'selected' : '' }}>
-                                                    {{ $kantor->nama_kantor }} ({{ strtoupper($kantor->jenis_kantor) }})
+                                                    {{ $kantor->nama_kantor }} 
                                                 </option>
                                             @endforeach
                                         </select>

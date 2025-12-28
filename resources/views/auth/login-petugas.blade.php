@@ -41,7 +41,7 @@
         <div class="hidden lg:flex lg:w-2/5 bg-gradient-to-br from-navy via-slate-900 to-slate-950 text-white flex-col justify-center px-12">
             <div class="mb-8">
                 <div class="flex items-center gap-3 mb-6">
-                    <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-white text-navy font-bold text-lg">DJ</div>
+                    <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-white text-navy font-bold text-lg"><img src="{{ asset('storage/img/Lambang_Bea_dan_Cukai.png') }}" alt="DJBC Logo" class="h-10 w-10 rounded-lg object-cover"></div>
                     <div>
                         <p class="text-xs font-semibold text-gold tracking-widest">DIREKTORAT JENDERAL</p>
                         <p class="text-lg font-bold leading-tight">Bea dan Cukai</p>
@@ -87,9 +87,9 @@
                 <!-- Logo Mobile -->
                 <div class="lg:hidden mb-8 text-center">
                     <div class="flex items-center justify-center gap-2 mb-4">
-                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-navy text-white font-semibold">DJ</div>
+                        <div class="flex h-12 w-12 items-center justify-center rounded-lg text-white font-semibold"><img src="{{ asset('storage/img/Lambang_Bea_dan_Cukai.png') }}" alt="DJBC Logo" class="h-12 w-12 rounded-lg object-cover"></div>
                         <div class="text-left">
-                            <p class="text-xs font-semibold text-gold tracking-wide">DIREKTORAT JENDERAL</p>
+                            <p class="text-xs font-semibold text-gold tracking-wide">E-RISET</p>
                             <p class="text-sm font-bold text-navy leading-tight">Bea dan Cukai</p>
                         </div>
                     </div>
@@ -144,7 +144,7 @@
                                 <label for="inputEmail" class="block text-sm font-semibold text-slate-700 mb-2">Email</label>
                                 <input type="email" id="inputEmail" name="email" value="{{ old('email') }}" required
                                     class="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/20"
-                                    placeholder="email@beacukai.go.id">
+                                    placeholder="nama@customs.go.id">
                             </div>
 
                             <div>
