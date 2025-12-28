@@ -9,7 +9,7 @@ class KantorBeaCukai extends Model
 {
     use HasFactory;
 
-    protected $table = 'kantor_bea_cukai';
+    protected $table = 'kantor_bea_cukais';
 
     protected $fillable = [
         'nama_kantor',
