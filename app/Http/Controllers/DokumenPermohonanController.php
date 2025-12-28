@@ -38,7 +38,12 @@ class DokumenPermohonanController extends Controller
         // 1. Tentukan Aturan Validasi
         $rules = [
             'judul_riset'               => 'required|string|max:255',
-            'proposal'                  => 'required|file|mimes:pdf|max:2048', // 2MB to match PHP config
+            // Dokumen Wajib
+            'proposal'                  => 'required|file|mimes:pdf|max:2048',
+            'surat_pengantar'           => 'required|file|mimes:pdf|max:2048', 
+            'surat_pernyataan'          => 'required|file|mimes:pdf|max:2048', 
+
+            // Data Riset
             'topik_tujuan_riset'        => 'required|string|max:255',
             'topik_tujuan_riset_baru'   => [
                 'nullable',
@@ -47,93 +52,123 @@ class DokumenPermohonanController extends Controller
                 'required_if:topik_tujuan_riset,tambah_topik_baru',
                 'unique:topik_risets,nama_topik',
             ],
-            'unit_kerja_lokasi_riset'   => 'required|string',
-            'jenis_permohonan_data'     => 'required|string',
+            'kantor_tujuan'             => 'required|integer|exists:kantor_bea_cukais,id', 
+            'jenis_permohonan_data'     => 'required|string|max:255',
             'data_statistik_yang_diminta' => 'nullable|string',
-            'kuisioner'                 => 'nullable|file|mimes:pdf,doc,docx|max:2048', // 2MB
-            'pedoman_wawancara'         => 'nullable|file|mimes:pdf,doc,docx|max:2048', // 2MB
-            'proposal_fgd'              => 'nullable|file|mimes:pdf,doc,docx|max:2048', // 2MB
-            'kantor_tujuan'             => 'required|integer|exists:kantor_bea_cukai,id',
+
+            // Dokumen Opsional
+            'kuisioner'                 => 'nullable|file|mimes:pdf,doc,docx|max:2048',
+            'pedoman_wawancara'         => 'nullable|file|mimes:pdf,doc,docx|max:2048',
+            'proposal_fgd'              => 'nullable|file|mimes:pdf,doc,docx|max:2048',
         ];
 
         // 2. Tentukan Pesan Error Kustom
         $messages = [
-            'proposal.required' => 'File proposal wajib diupload.',
-            'proposal.file' => 'Proposal harus berupa file.',
-            'proposal.mimes' => 'Proposal harus berformat PDF.',
-            'proposal.max' => 'Ukuran file proposal maksimal 2MB.',
-            'kantor_tujuan.required' => 'Kantor tujuan wajib dipilih.',
-            'kantor_tujuan.exists' => 'Kantor tujuan yang dipilih tidak valid.',
-            'topik_tujuan_riset_baru.required_if' => 'Nama topik baru wajib diisi jika Anda memilih "Lainnya".',
-            'topik_tujuan_riset_baru.unique' => 'Nama topik baru ini sudah ada, silakan pilih dari daftar.',
+            'proposal.required'         => 'File proposal riset wajib diupload.',
+            'surat_pengantar.required'  => 'Surat pengantar dari kampus/instansi wajib diupload.',
+            'surat_pernyataan.required' => 'Surat pernyataan bermeterai wajib diupload.',
+            'kantor_tujuan.required'    => 'Kantor tujuan wajib dipilih.',
+            'kantor_tujuan.exists'      => 'Kantor tujuan yang dipilih tidak valid.',
+            'mimes'                     => 'Format file harus :values.',
+            'max'                       => 'Ukuran file maksimal 2MB.',
         ];
 
         // 3. Jalankan Validasi
         $validated = $request->validate($rules, $messages);
 
+        // Inisialisasi variabel path agar bisa dihapus di catch block jika error
+        $proposalPath = null;
+        $pengantarPath = null;
+        $pernyataanPath = null;
+        $kuisionerPath = null;
+        $wawancaraPath = null;
+        $fgdPath = null;
+
         try {
-            // 4. Proses Upload File dengan error handling
-            if (!$request->hasFile('proposal')) {
-                return back()->withErrors(['proposal' => 'File proposal tidak ditemukan.'])->withInput();
-            }
-
-            if (!$request->file('proposal')->isValid()) {
-                return back()->withErrors(['proposal' => 'File proposal tidak valid atau rusak.'])->withInput();
-            }
-
-            // Create storage directories if they don't exist
+            // 4. Proses Upload File (Buat folder jika belum ada)
             Storage::disk('public')->makeDirectory('dokumen/proposal');
+            Storage::disk('public')->makeDirectory('dokumen/pengantar');
+            Storage::disk('public')->makeDirectory('dokumen/pernyataan');
             Storage::disk('public')->makeDirectory('dokumen/kuisioner');
             Storage::disk('public')->makeDirectory('dokumen/wawancara');
             Storage::disk('public')->makeDirectory('dokumen/fgd');
 
-            $proposalPath = $request->file('proposal')->store('dokumen/proposal', 'public');
-            if (!$proposalPath) {
-                return back()->withErrors(['proposal' => 'Gagal mengupload file proposal.'])->withInput();
+            // A. Upload Dokumen Wajib
+            if ($request->hasFile('proposal') && $request->file('proposal')->isValid()) {
+                $proposalPath = $request->file('proposal')->store('dokumen/proposal', 'public');
             }
 
+            if ($request->hasFile('surat_pengantar') && $request->file('surat_pengantar')->isValid()) {
+                $pengantarPath = $request->file('surat_pengantar')->store('dokumen/pengantar', 'public');
+            }
+
+            if ($request->hasFile('surat_pernyataan') && $request->file('surat_pernyataan')->isValid()) {
+                $pernyataanPath = $request->file('surat_pernyataan')->store('dokumen/pernyataan', 'public');
+            }
+
+            // Cek jika upload wajib gagal
+            if (!$proposalPath || !$pengantarPath || !$pernyataanPath) {
+                throw new \Exception('Gagal mengupload salah satu dokumen wajib.');
+            }
+
+            // B. Upload Dokumen Opsional
             $kuisionerPath = $request->hasFile('kuisioner') && $request->file('kuisioner')->isValid() ?
                 $request->file('kuisioner')->store('dokumen/kuisioner', 'public') : null;
+
             $wawancaraPath = $request->hasFile('pedoman_wawancara') && $request->file('pedoman_wawancara')->isValid() ?
                 $request->file('pedoman_wawancara')->store('dokumen/wawancara', 'public') : null;
+
             $fgdPath = $request->hasFile('proposal_fgd') && $request->file('proposal_fgd')->isValid() ?
                 $request->file('proposal_fgd')->store('dokumen/fgd', 'public') : null;
         } catch (\Exception $e) {
+            // Hapus file yang sudah terlanjur ter-upload jika terjadi error validasi upload
+            if ($proposalPath) Storage::disk('public')->delete($proposalPath);
+            if ($pengantarPath) Storage::disk('public')->delete($pengantarPath);
+            if ($pernyataanPath) Storage::disk('public')->delete($pernyataanPath);
+
             Log::error('File upload error: ' . $e->getMessage());
-            return back()->withErrors(['upload' => 'Terjadi kesalahan saat mengupload file: ' . $e->getMessage()])->withInput();
+            return back()->withErrors(['upload' => 'Gagal mengupload file: ' . $e->getMessage()])->withInput();
         }
 
         // 5. Proses Logika Topik Riset
         $namaTopikFinal = '';
         if ($validated['topik_tujuan_riset'] == 'tambah_topik_baru') {
-            // Jika topik baru, simpan ke tabel master
             $namaTopikFinal = $validated['topik_tujuan_riset_baru'];
-            TopikRiset::create([
-                'nama_topik' => $namaTopikFinal,
-                'deskripsi' => 'Topik baru ditambahkan oleh pengguna.'
-            ]);
+            // Opsional: Cek lagi apakah topik sudah ada untuk menghindari duplikasi manual
+            $existingTopik = TopikRiset::where('nama_topik', $namaTopikFinal)->first();
+            if (!$existingTopik) {
+                TopikRiset::create([
+                    'nama_topik' => $namaTopikFinal,
+                    'deskripsi' => 'Topik baru ditambahkan oleh pengguna.'
+                ]);
+            }
         } else {
-            // Jika topik lama, gunakan yang dari dropdown
             $namaTopikFinal = $validated['topik_tujuan_riset'];
         }
 
         // 6. Siapkan Data Final untuk Disimpan
-        $dataToSave = $validated; // Mulai dengan semua data tervalidasi
+        $dataToSave = $validated;
 
-        // Timpa/Tambahkan data spesifik
+        // Mapping Path File
         $dataToSave['proposal'] = $proposalPath;
+        $dataToSave['surat_pengantar'] = $pengantarPath;
+        $dataToSave['surat_pernyataan'] = $pernyataanPath;
         $dataToSave['kuisioner'] = $kuisionerPath;
         $dataToSave['pedoman_wawancara'] = $wawancaraPath;
         $dataToSave['proposal_fgd'] = $fgdPath;
-        $dataToSave['user_id'] = Auth::id();
-        $dataToSave['status'] = 'diproses'; // Status awal permohonan baru
-        $dataToSave['topik_tujuan_riset'] = $namaTopikFinal; // Ini adalah perbaikan utamanya
 
-        // Hapus field sementara
+        // Mapping Data Lain
+        $dataToSave['user_id'] = Auth::id();
+        $dataToSave['status'] = 'diproses';
+        $dataToSave['topik_tujuan_riset'] = $namaTopikFinal;
+
+        // Hapus field yang tidak ada di tabel database
         unset($dataToSave['topik_tujuan_riset_baru']);
+        // 'kantor_tujuan' sudah sesuai dengan nama kolom di migrasi (foreign key)
 
         try {
             // 7. Simpan ke Database
+
             // Generate service number: 4digit-year (NNNN-YYYY)
             $year = now()->year;
             $countThisYear = DokumenPermohonan::whereYear('created_at', $year)->count() + 1;
@@ -142,21 +177,22 @@ class DokumenPermohonanController extends Controller
 
             $dokumen = DokumenPermohonan::create($dataToSave);
 
-            // Log successful creation
-            Log::info('Dokumen permohonan berhasil dibuat', ['dokumen_id' => $dokumen->id, 'user_id' => Auth::id()]);
+            Log::info('Dokumen permohonan berhasil dibuat', ['id' => $dokumen->id, 'user' => Auth::id()]);
 
             // 8. Redirect
-            return redirect()->route('dashboardPage')->with('success', 'Permohonan dokumen berhasil dikirim!');
+            return redirect()->route('dashboardPage')->with('success', 'Permohonan riset berhasil dikirim! Status saat ini: Diproses.');
         } catch (\Exception $e) {
             Log::error('Database save error: ' . $e->getMessage());
 
-            // Delete uploaded files if database save fails
-            if (isset($proposalPath)) Storage::disk('public')->delete($proposalPath);
-            if (isset($kuisionerPath)) Storage::disk('public')->delete($kuisionerPath);
-            if (isset($wawancaraPath)) Storage::disk('public')->delete($wawancaraPath);
-            if (isset($fgdPath)) Storage::disk('public')->delete($fgdPath);
+            // Hapus semua file jika penyimpanan database gagal (Rollback File)
+            if ($proposalPath) Storage::disk('public')->delete($proposalPath);
+            if ($pengantarPath) Storage::disk('public')->delete($pengantarPath);
+            if ($pernyataanPath) Storage::disk('public')->delete($pernyataanPath);
+            if ($kuisionerPath) Storage::disk('public')->delete($kuisionerPath);
+            if ($wawancaraPath) Storage::disk('public')->delete($wawancaraPath);
+            if ($fgdPath) Storage::disk('public')->delete($fgdPath);
 
-            return back()->withErrors(['database' => 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage()])->withInput();
+            return back()->withErrors(['database' => 'Terjadi kesalahan sistem saat menyimpan data. Silakan coba lagi.'])->withInput();
         }
     }
 
@@ -202,7 +238,7 @@ class DokumenPermohonanController extends Controller
                 'status' => 'required|string'
             ]);
             $toStatus = $request->status;
-            
+
             // Handle verifikasi actions (tidak mengubah status database)
             if ($toStatus === 'verifikasi_berkas') {
                 // Pelaksana verifikasi berkas - tandai sudah diverifikasi
@@ -214,7 +250,7 @@ class DokumenPermohonanController extends Controller
                     'message' => 'Berkas berhasil diverifikasi. Lanjut ke Eselon IV.'
                 ], 200);
             }
-            
+
             if ($toStatus === 'verifikasi_tema') {
                 // Eselon IV verifikasi tema & narasumber
                 $permohonan->tanggal_verifikasi_pejabat = now();
@@ -225,7 +261,7 @@ class DokumenPermohonanController extends Controller
                     'message' => 'Tema & narasumber berhasil diverifikasi. Lanjut ke TTE.'
                 ], 200);
             }
-            
+
             // Use strict workflow validation untuk status database
             $permohonan->updateStatusWithRole($toStatus, $user);
             return response()->json([
@@ -261,7 +297,7 @@ class DokumenPermohonanController extends Controller
         // Jika login via petugas, cek akses kantor
         if (auth('petugas')->check()) {
             $petugas = auth('petugas')->user();
-            
+
             // Validasi akses berdasarkan kantor
             if (!$this->canAccessDokumen($dokumen, $petugas)) {
                 abort(403, 'Anda tidak memiliki akses ke dokumen dari kantor lain.');

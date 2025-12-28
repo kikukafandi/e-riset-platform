@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Route;
 use App\Models\DokumenPermohonan;
 use App\Models\User;
 use App\Helpers\ResearchStatus;
+use App\Http\Controllers\ProfileController;
 
 Route::get('/', function () {
     $activeRequests = DokumenPermohonan::whereIn('status', [ResearchStatus::DIPROSES, ResearchStatus::DITERIMA])
@@ -26,17 +27,17 @@ Route::get('/', function () {
         ->value('avg_days');
 
     $institutionsServed = User::where(function ($q) {
-            $q->whereNotNull('instansi')->where('instansi', '<>', '');
-            $q->orWhere(function ($q2) {
-                $q2->whereNotNull('kampus')->where('kampus', '<>', '');
-            });
-        })
+        $q->whereNotNull('instansi')->where('instansi', '<>', '');
+        $q->orWhere(function ($q2) {
+            $q2->whereNotNull('kampus')->where('kampus', '<>', '');
+        });
+    })
         ->selectRaw("COUNT(DISTINCT COALESCE(NULLIF(instansi, ''), NULLIF(kampus, ''))) as total")
         ->value('total');
 
     $archivedDocs = DokumenPermohonan::where(function ($q) {
-            $q->whereNotNull('generated_letter_path')->orWhereNotNull('file_paper_pdf');
-        })
+        $q->whereNotNull('generated_letter_path')->orWhereNotNull('file_paper_pdf');
+    })
         ->count();
 
     return view('welcome', [
@@ -85,7 +86,8 @@ Route::post('/logout-petugas', [PetugasController::class, 'logoutPetugas'])->nam
 Route::middleware(['CekLogin:web'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboardPage');
     Route::get('/dashboard/pengajuan', [DashboardController::class, 'create'])->name('dashboardPengajuan');
-
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     // Dokumen (CRUD)
     Route::get('/dokumen', [DokumenPermohonanController::class, 'index'])->name('dokumen.index');
     Route::get('/dokumen/create', [DokumenPermohonanController::class, 'create'])->name('dokumen.create');
@@ -96,7 +98,7 @@ Route::middleware(['CekLogin:web'])->group(function () {
     Route::delete('/dokumen/{id}', [DokumenPermohonanController::class, 'destroy'])->name('dokumen.destroy');
 
     Route::get('/dokumen/status', [DokumenPermohonanController::class, 'status'])->name('dokumen.status');
-    
+
     // Research completion features
     Route::post('/dokumen/{id}/complete-research', [DokumenPermohonanController::class, 'updateResearchCompletion'])->name('dokumen.complete.research');
     Route::get('/check-eligibility/{userId}', [DokumenPermohonanController::class, 'checkResearcherEligibility'])->name('check.eligibility');
@@ -155,20 +157,20 @@ Route::middleware(['CekLogin:petugas'])->group(function () {
     Route::get('/statistics/topic-usage', [StatisticsController::class, 'getTopicUsageStats'])->name('statistics.topic.usage');
     Route::get('/statistics/office-destinations', [StatisticsController::class, 'getOfficeDestinationStats'])->name('statistics.office.destinations');
     Route::get('/statistics/research-completion', [StatisticsController::class, 'getResearchCompletionStats'])->name('statistics.research.completion');
-    
+
     // Research completion dashboard
     Route::get('/research-completion-dashboard', [DokumenPermohonanController::class, 'researchCompletionDashboard'])->name('research.completion.dashboard');
-    
+
     // Update overdue research (can be scheduled as cron job)
     Route::post('/update-overdue-research', [StatisticsController::class, 'updateOverdueResearch'])->name('update.overdue.research');
 
     // Paper Validation and Verification Routes
     Route::get('/validation-queue', [TimelineController::class, 'validationQueue'])->name('validation.queue');
     Route::post('/timeline/validate-paper/{id}', [TimelineController::class, 'validatePaper'])->name('timeline.validate.paper');
-    
+
     Route::get('/verification-queue', [TimelineController::class, 'verificationQueue'])->name('verification.queue');
     Route::post('/timeline/official-verification/{id}', [TimelineController::class, 'officialVerification'])->name('timeline.official.verification');
-    
+
     // Letter Generation Routes
     Route::get('/timeline/generate-letter/{id}', [TimelineController::class, 'generateApprovalLetter'])->name('timeline.generate.letter');
 

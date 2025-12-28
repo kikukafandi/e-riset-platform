@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('petugas', function (Blueprint $table) {
             $table->unsignedBigInteger('kantor_id')->nullable()->after('role');
-            $table->foreign('kantor_id')->references('id')->on('kantor_bea_cukai')->onDelete('set null');
+            $table->foreign('kantor_id')->references('id')->on('kantor_bea_cukais')->onDelete('set null');
         });
     }
 
