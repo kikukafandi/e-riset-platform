@@ -1,328 +1,626 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-{{-- <<<<<<< HEAD
-    <title>Portal - E-Riset Bea Cukai</title>
-    
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet"> --}}
-{{-- ======= --}}
-    <title>Platform E-Riset DJBC</title>
-{{-- >>>>>>> b6afdbc73e698d6c2cd4e568df2b437698209599 --}}
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>e-Riset Direktorat Jenderal Pajak</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
+
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        navy: '#0F2A44',
-                        gold: '#D4AF37',
-                        slate: {
-                            950: '#0A1A2C'
-                        }
+                        primary: '#202c5f', // Navy DJP
+                        secondary: '#FFD400', // Kuning DJP
+                        accent: '#F3F4F6'
                     },
                     fontFamily: {
-                        sans: ['"Source Sans 3"', 'ui-sans-serif', 'system-ui']
+                        sans: ['Inter', 'sans-serif'],
                     }
                 }
             }
-        };
+        }
     </script>
 
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
         body {
-/* ======= */
-            font-family: 'Source Sans 3', sans-serif;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Hide Scrollbar for Tabs */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Carousel CSS */
+        .carousel-track {
+            display: flex;
+            transition: transform 0.5s ease-out;
+            cursor: grab;
+        }
+
+        .carousel-track:active {
+            cursor: grabbing;
+        }
+
+        .carousel-slide {
+            min-width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+        }
+
+        .carousel-slide img {
+            pointer-events: none;
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900">
-    @php
-        $metrics = $metrics ?? [
-            'active_requests' => 0,
-            'average_sla_days' => null,
-            'institutions_served' => 0,
-            'archived_docs' => 0,
-        ];
-    @endphp
-    <header class="sticky top-0 z-30">
-        <nav id="main-nav" class="transition-all duration-300">
-            <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 lg:px-6">
-                <div class="flex items-center gap-2">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-navy text-white font-semibold">DJ</div>
-                    <div>
-                        <p class="text-sm font-semibold text-gold tracking-wide">DIREKTORAT JENDERAL</p>
-                        <p class="text-base font-bold text-navy leading-tight">Bea dan Cukai</p>
-                    </div>
+
+<body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen">
+
+    <header class="bg-white/95 backdrop-blur-md shadow-sm fixed w-full top-0 z-50 transition-all">
+        <div class="max-w-7xl mx-auto flex justify-between items-center px-4 sm:px-6 lg:px-8 py-3">
+            <div class="flex items-center gap-2">
+                <div class="bg-primary text-secondary font-bold rounded px-2.5 py-1 text-xl leading-none shadow-sm">e
                 </div>
-                <div class="hidden items-center gap-8 text-sm font-semibold text-slate-800 lg:flex">
-                    <a href="#beranda" class="hover:text-navy">Beranda</a>
-                    <a href="#tentang" class="hover:text-navy">Tentang Platform</a>
-                    <a href="#alur" class="hover:text-navy">Alur Permohonan</a>
-                    <a href="{{ route('login') }}" class="rounded-full bg-navy px-4 py-2 text-white hover:bg-slate-950">Ajukan Permohonan</a>
-                </div>
-                <button id="menu-toggle" class="inline-flex items-center rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 lg:hidden" aria-label="Toggle menu">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16" /></svg>
-                </button>
-{{-- >>>>>>> b6afdbc73e698d6c2cd4e568df2b437698209599 --}}
+                <span class="font-bold text-xl tracking-tight text-primary">riset</span>
             </div>
-            <div id="mobile-menu" class="hidden border-t border-slate-200 bg-white lg:hidden">
-                <div class="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-3 text-sm font-semibold text-slate-800">
-                    <a href="#beranda" class="hover:text-navy">Beranda</a>
-                    <a href="#tentang" class="hover:text-navy">Tentang Platform</a>
-                    <a href="#alur" class="hover:text-navy">Alur Permohonan</a>
-                    <a href="{{ route('login') }}" class="rounded-full bg-navy px-4 py-2 text-white text-center hover:bg-slate-950">Ajukan Permohonan</a>
-                </div>
-            </div>
-        </nav>
+            <a href="/login"
+                class="text-sm font-semibold text-primary border border-primary px-6 py-2 rounded-full hover:bg-primary hover:text-white transition-all duration-300 shadow-sm">
+                Login
+            </a>
+        </div>
     </header>
 
-    <main>
+    <section class="relative pt-24 pb-32 md:pt-32 md:pb-48 bg-primary overflow-hidden">
+        <div
+            class="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 md:w-96 md:h-96 bg-secondary opacity-10 rounded-full blur-3xl">
+        </div>
+        <div class="absolute bottom-20 left-10 w-40 h-40 md:w-64 md:h-64 bg-white opacity-5 rounded-full blur-3xl">
+        </div>
 
-{{-- ======= --}}
-        <section id="beranda" class="relative overflow-hidden bg-gradient-to-br from-navy via-slate-900 to-slate-950 text-white">
-            <div class="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(212,175,55,0.10),transparent_35%)]"></div>
-            <div class="relative mx-auto flex max-w-6xl flex-col gap-10 px-4 py-20 lg:flex-row lg:items-center lg:px-6 lg:py-24">
-                <div class="space-y-6 lg:w-3/5">
-                    <p class="text-sm font-semibold uppercase tracking-[0.3em] text-gold">Platform Resmi DJBC</p>
-                    <h1 class="text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">Platform E-Riset Direktorat Jenderal Bea dan Cukai</h1>
-                    <p class="max-w-2xl text-lg text-slate-200">Sistem digital untuk pengajuan dan pengelolaan permohonan riset serta permintaan data secara terintegrasi, transparan, dan akuntabel.</p>
-                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-                        <a href="{{ route('login') }}" class="rounded-full bg-gold px-6 py-3 text-base font-semibold text-slate-900 shadow-lg shadow-amber-200/30 hover:bg-[#c49c2f]">Ajukan Permohonan Riset</a>
-{{-- >>>>>>> b6afdbc73e698d6c2cd4e568df2b437698209599 --}}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
+
+            <div class="relative overflow-hidden rounded-2xl group bg-primary">
+                <div class="carousel-track" id="heroCarousel">
+                    <div class="carousel-slide">
+                        <img src="https://eriset.pajak.go.id/image/slider-eriset-1-new.png" alt="Banner 1"
+                            class="w-full h-[200px] sm:h-[300px] md:h-[450px] object-contain bg-primary">
+                    </div>
+                    <div class="carousel-slide">
+                        <img src="https://eriset.pajak.go.id/image/slider-eriset-2-new.svg" alt="Banner 2"
+                            class="w-full h-[200px] sm:h-[300px] md:h-[450px] object-contain bg-primary">
+                    </div>
+                    <div class="carousel-slide">
+                        <img src="https://eriset.pajak.go.id/image/slider-eriset-2.svg" alt="Banner 3"
+                            class="w-full h-[200px] sm:h-[300px] md:h-[450px] object-contain bg-primary">
                     </div>
                 </div>
-                <div class="lg:w-2/5">
-                    <div class="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-2xl backdrop-blur">
-                        <div class="flex items-center justify-between border-b border-white/10 pb-4">
+
+                <button onclick="moveSlide(-1)"
+                    class="absolute left-4 top-1/2 -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white p-2 rounded-full backdrop-blur-sm transition hidden md:block">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+                <button onclick="moveSlide(1)"
+                    class="absolute right-4 top-1/2 -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white p-2 rounded-full backdrop-blur-sm transition hidden md:block">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+
+                <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                    <button onclick="goToSlide(0)"
+                        class="indicator w-8 h-1 rounded-full bg-white/40 hover:bg-white transition-all duration-300"></button>
+                    <button onclick="goToSlide(1)"
+                        class="indicator w-8 h-1 rounded-full bg-white/40 hover:bg-white transition-all duration-300"></button>
+                    <button onclick="goToSlide(2)"
+                        class="indicator w-8 h-1 rounded-full bg-white/40 hover:bg-white transition-all duration-300"></button>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-10">
+            <svg class="relative block w-full h-[40px] sm:h-[60px] md:h-[100px]" xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 1440 320" preserveAspectRatio="none">
+                <path fill="#FFD400" fill-opacity="1"
+                    d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,224C672,245,768,267,864,261.3C960,256,1056,224,1152,197.3C1248,171,1344,149,1392,138.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z">
+                </path>
+            </svg>
+        </div>
+    </section>
+
+    <section class="relative -mt-16 md:-mt-24 z-30 pb-12 px-4 sm:px-6 lg:px-8 flex-grow">
+        <div
+            class="max-w-7xl mx-auto bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden min-h-[500px]">
+
+            <div class="border-b border-gray-200 overflow-x-auto scrollbar-hide bg-white sticky top-0 z-20">
+                <div class="flex whitespace-nowrap px-4 md:px-6 pt-2">
+                    <button onclick="openTab(event, 'tab-info')"
+                        class="tab-btn active border-b-4 border-primary text-primary font-bold px-4 md:px-5 py-3 md:py-4 hover:bg-gray-50 transition-colors text-sm md:text-base outline-none">
+                        Riset di Lingkungan DJP
+                    </button>
+                    <button onclick="openTab(event, 'tab-ketentuan')"
+                        class="tab-btn border-b-4 border-transparent text-gray-500 font-medium px-4 md:px-5 py-3 md:py-4 hover:text-primary hover:bg-gray-50 transition-colors text-sm md:text-base outline-none">
+                        Ketentuan Izin Riset
+                    </button>
+                    <button onclick="openTab(event, 'tab-hasil')"
+                        class="tab-btn border-b-4 border-transparent text-gray-500 font-medium px-4 md:px-5 py-3 md:py-4 hover:text-primary hover:bg-gray-50 transition-colors text-sm md:text-base outline-none">
+                        Daftar Hasil Riset
+                    </button>
+                    <button onclick="openTab(event, 'tab-faq')"
+                        class="tab-btn border-b-4 border-transparent text-gray-500 font-medium px-4 md:px-5 py-3 md:py-4 hover:text-primary hover:bg-gray-50 transition-colors text-sm md:text-base outline-none">
+                        FAQ Riset
+                    </button>
+                    <button onclick="openTab(event, 'tab-kontak')"
+                        class="tab-btn border-b-4 border-transparent text-gray-500 font-medium px-4 md:px-5 py-3 md:py-4 hover:text-primary hover:bg-gray-50 transition-colors text-sm md:text-base outline-none">
+                        Hubungi Kami
+                    </button>
+                </div>
+            </div>
+
+            <div class="p-6 md:p-10 bg-white">
+                <div id="tab-info" class="tab-content active">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-start">
+                        <div class="relative group w-full rounded-xl overflow-hidden">
+                            <img src="https://eriset.pajak.go.id/image/content-1.svg" alt="Gedung DJP"
+                                class="w-full h-auto object-cover transform group-hover:scale-105 transition duration-500">
+                        </div>
+
+                        <div class="space-y-6 text-gray-600">
                             <div>
-                                <p class="text-xs uppercase tracking-widest text-gold">Ringkasan</p>
-                                <p class="text-lg font-semibold">Pengelolaan Permohonan Riset</p>
+                                <h3 class="text-2xl font-bold text-primary mb-2">DJP dan Riset Perpajakan</h3>
+                                <div class="w-16 h-1 bg-secondary rounded-full"></div>
                             </div>
-                            <span class="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white">Realtime</span>
-                        </div>
-{{-- <<<<<<< HEAD
-                    </div>
-                    <div class="col-md-4">
-                        <div class="p-3">
-                            <h3 class="fw-bold text-primary">02.</h3>
-                            <h5 class="fw-bold mt-3">Unggah Dokumen</h5>
-                            <p class="text-muted">Upload proposal dan dokumen pendukung lainnya.</p>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="p-3">
-                            <h3 class="fw-bold text-primary">03.</h3>
-                            <h5 class="fw-bold mt-3">Pantau & Terima Izin</h5>
-                            <p class="text-muted">Lacak prosesnya dan unduh surat izin setelah disetujui. Siap mulai riset!</p> --}}
-{{-- ======= --}}
-                        <div class="mt-4 grid grid-cols-2 gap-4 text-slate-100">
-                            <div class="rounded-lg bg-white/5 p-4">
-                                <p class="text-sm text-slate-200">Permohonan Aktif</p>
-                                <p class="text-2xl font-bold text-gold">{{ number_format($metrics['active_requests'] ?? 0) }}</p>
+                            <p class="leading-relaxed text-sm md:text-base">
+                                Dalam rangka mewujudkan Visi Menjadi Mitra Tepercaya Pembangunan Bangsa untuk Menghimpun
+                                Penerimaan Negara melalui Penyelenggaraan Administrasi Perpajakan yang Efisien, Efektif,
+                                Berintegritas, dan Berkeadilan dalam rangka mendukung Visi Kementerian Keuangan:
+                                "Menjadi Pengelola Keuangan Negara untuk Mewujudkan Perekonomian Indonesia yang
+                                Produktif, Kompetitif, Inklusif dan Berkeadilan”, Direktorat Jenderal Pajak (DJP)
+                                senantiasa mengembangkan kebijakan di bidang perpajakan. Riset merupakan salah satu
+                                dasar acuan yang digunakan dalam pengembangan kebijakan di DJP.
+                            </p>
+                            <p class="leading-relaxed text-sm md:text-base">
+                                Riset adalah kegiatan penelitian sebagaimana dimaksud dalam peraturan perundang-undangan
+                                yang mengatur tentang penelitian. Ruang lingkup riset perpajakan meliputi penyusunan
+                                Skripsi, Tesis, Disertasi, Karya Ilmiah, Riset untuk tujuan tertentu, dan lain-lain.
+                            </p>
+
+                            <div class="bg-blue-50/80 p-5 rounded-xl border border-blue-100">
+                                <h4 class="font-bold text-primary mb-3 flex items-center gap-2 text-sm md:text-base">
+                                    <svg class="w-5 h-5 text-secondary" fill="currentColor" viewBox="0 0 20 20">
+                                        <path
+                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" />
+                                    </svg>
+                                    DJP menghimpun sembilan rumpun tema riset di bidang perpajakan:
+                                </h4>
+                                <ul class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm ml-2">
+                                    <li class="flex items-center gap-2"><span
+                                            class="w-1.5 h-1.5 bg-secondary rounded-full flex-shrink-0"></span>Kepatuhan
+                                        Perpajakan</li>
+                                    <li class="flex items-center gap-2"><span
+                                            class="w-1.5 h-1.5 bg-secondary rounded-full flex-shrink-0"></span>Peraturan
+                                        Perpajakan</li>
+                                    <li class="flex items-center gap-2"><span
+                                            class="w-1.5 h-1.5 bg-secondary rounded-full flex-shrink-0"></span>Teknologi
+                                        Informasi Perpajakan</li>
+                                    <li class="flex items-center gap-2"><span
+                                            class="w-1.5 h-1.5 bg-secondary rounded-full flex-shrink-0"></span>SDM dan
+                                        Organisasi DJP</li>
+                                    <li class="flex items-center gap-2"><span
+                                            class="w-1.5 h-1.5 bg-secondary rounded-full flex-shrink-0"></span>Edukasi
+                                        Perpajakan</li>
+                                    <li class="flex items-center gap-2"><span
+                                            class="w-1.5 h-1.5 bg-secondary rounded-full flex-shrink-0"></span>Layanan
+                                        Perpajakan</li>
+                                    <li class="flex items-center gap-2"><span
+                                            class="w-1.5 h-1.5 bg-secondary rounded-full flex-shrink-0"></span>Penegakan
+                                        Hukum Perpajakan</li>
+                                    <li class="flex items-center gap-2"><span
+                                            class="w-1.5 h-1.5 bg-secondary rounded-full flex-shrink-0"></span>Proses
+                                        Bisnis Perpajakan</li>
+                                    <li class="flex items-center gap-2"><span
+                                            class="w-1.5 h-1.5 bg-secondary rounded-full flex-shrink-0"></span>Perpajakan
+                                        Internasional</li>
+                                </ul>
                             </div>
-                            <div class="rounded-lg bg-white/5 p-4">
-                                <p class="text-sm text-slate-200">Rata-rata SLA</p>
-                                <p class="text-2xl font-bold text-white">
-                                    @if(!is_null($metrics['average_sla_days']))
-                                        {{ round($metrics['average_sla_days'], 1) }} hari
-                                    @else
-                                        N/A
-                                    @endif
-                                </p>
+
+                            <div class="bg-yellow-50 p-4 rounded-xl border border-yellow-100">
+                                <h4 class="font-bold text-primary mb-2 text-sm md:text-base">Surat Izin Riset</h4>
+                                <p class="text-sm md:text-base text-gray-700">Setiap mahasiswa atau masyarakat atau
+                                    badan/lembaga yang akan melakukan penelitian atau riset di lingkungan DJP wajib
+                                    memperoleh surat izin riset dari DJP.</p>
                             </div>
-                            <div class="rounded-lg bg-white/5 p-4">
-                                <p class="text-sm text-slate-200">Institusi Terlayani</p>
-                                <p class="text-2xl font-bold text-white">{{ number_format($metrics['institutions_served'] ?? 0) }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-ketentuan" class="tab-content space-y-4">
+                    <div class="mb-6">
+                        <h3 class="text-xl font-bold text-primary">Ketentuan dan Prosedur Riset</h3>
+                        <p class="text-sm text-gray-500">Pahami syarat dan ketentuan sebelum mengajukan permohonan.</p>
+                    </div>
+
+                    <div class="border border-gray-200 rounded-lg overflow-hidden hover:border-secondary transition">
+                        <button onclick="toggleAccordion('acc-1')"
+                            class="w-full flex justify-between items-center bg-gray-50 p-4 font-semibold text-left hover:bg-gray-100 transition">
+                            <span class="text-primary text-sm md:text-base">1. Kategori Periset</span>
+                            <svg id="icon-acc-1" class="w-5 h-5 text-gray-400 transform transition-transform"
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div id="acc-1" class="hidden p-5 text-sm text-gray-600 bg-white border-t">
+                            <ul class="space-y-2 ml-4 list-disc marker:text-secondary">
+                                <li>Mahasiswa pada semua jenjang pendidikan (D3, S1, S2, S3).</li>
+                                <li>Perorangan selain mahasiswa.</li>
+                                <li>Kelompok peneliti.</li>
+                                <li>Badan atau lembaga riset.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="border border-gray-200 rounded-lg overflow-hidden hover:border-secondary transition">
+                        <button onclick="toggleAccordion('acc-2')"
+                            class="w-full flex justify-between items-center bg-gray-50 p-4 font-semibold text-left hover:bg-gray-100 transition">
+                            <span class="text-primary text-sm md:text-base">2. Dokumen Persyaratan</span>
+                            <svg id="icon-acc-2" class="w-5 h-5 text-gray-400 transform transition-transform"
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div id="acc-2" class="hidden p-5 text-sm text-gray-600 bg-white border-t space-y-4">
+                            <div>
+                                <strong class="text-gray-800 block mb-2">Dokumen Wajib:</strong>
+                                <ul class="list-disc ml-4 space-y-1 marker:text-secondary">
+                                    <li>Surat keterangan/pengantar dari perguruan tinggi/lembaga.</li>
+                                    <li>Proposal Riset yang jelas dan terperinci.</li>
+                                    <li>Surat pernyataan bermeterai (Template tersedia).</li>
+                                </ul>
                             </div>
-                            <div class="rounded-lg bg-white/5 p-4">
-                                <p class="text-sm text-slate-200">Dokumen Terarsip</p>
-                                <p class="text-2xl font-bold text-gold">{{ number_format($metrics['archived_docs'] ?? 0) }}</p>
+                            <div class="bg-yellow-50 p-3 rounded-md border border-yellow-100">
+                                <strong class="text-yellow-800 block mb-1">Khusus Non-Mahasiswa:</strong>
+                                <ul class="list-disc ml-4 space-y-1 text-yellow-900/80">
+                                    <li>Wajib memiliki NPWP & Lapor SPT Tahunan (2 tahun terakhir).</li>
+                                    <li>Bukti lunas tunggakan pajak (SKF).</li>
+                                </ul>
                             </div>
-{{-- >>>>>>> b6afdbc73e698d6c2cd4e568df2b437698209599 --}}
                         </div>
                     </div>
-                </div>
-            </div>
-        </section>
 
-        <section id="tentang" class="mx-auto max-w-6xl px-4 py-16 lg:px-6">
-            <div class="grid gap-10 lg:grid-cols-3 lg:items-center">
-                <div class="lg:col-span-1">
-                    <p class="text-sm font-semibold uppercase tracking-[0.25em] text-navy">Tentang Platform</p>
-                    <h2 class="mt-4 text-2xl font-bold text-slate-900 lg:text-3xl">Sistem resmi untuk pengajuan riset yang kredibel dan terintegrasi</h2>
-                    <p class="mt-4 text-base text-slate-700">Platform E-Riset DJBC memfasilitasi pengajuan permohonan riset dan permintaan data oleh mahasiswa maupun peneliti eksternal, sekaligus mendukung pengelolaan internal oleh petugas DJBC secara transparan dan efisien.</p>
-                </div>
-                <div class="lg:col-span-2 grid gap-6 md:grid-cols-2">
-                    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                        <div class="flex items-center gap-3 text-navy">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.75 5.25h16.5M3.75 9.75h16.5M3.75 14.25h9.75M3.75 18.75h9.75" /></svg>
-                            <h3 class="text-lg font-semibold">Digitalisasi Pengajuan</h3>
+                    <div class="border border-gray-200 rounded-lg overflow-hidden hover:border-secondary transition">
+                        <button onclick="toggleAccordion('acc-3')"
+                            class="w-full flex justify-between items-center bg-gray-50 p-4 font-semibold text-left hover:bg-gray-100 transition">
+                            <span class="text-primary text-sm md:text-base">3. Unit Pemroses Izin Riset</span>
+                            <svg id="icon-acc-3" class="w-5 h-5 text-gray-400 transform transition-transform"
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div id="acc-3" class="hidden p-5 text-sm text-gray-600 bg-white border-t">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="p-4 rounded-lg border border-blue-100 bg-blue-50/50">
+                                    <strong class="text-primary block mb-2">Kantor Pusat (Direktorat P2Humas)</strong>
+                                    <ul class="list-disc ml-4 text-xs space-y-1">
+                                        <li>Mahasiswa S2 & S3.</li>
+                                        <li>Lokasi riset di Kantor Pusat / UPT.</li>
+                                        <li>Periset Non-Mahasiswa.</li>
+                                    </ul>
+                                </div>
+                                <div class="p-4 rounded-lg border border-yellow-100 bg-yellow-50/50">
+                                    <strong class="text-yellow-800 block mb-2">Kantor Wilayah (Kanwil DJP)</strong>
+                                    <ul class="list-disc ml-4 text-xs space-y-1">
+                                        <li>Mahasiswa D3, D4, S1.</li>
+                                        <li>Lokasi riset di unit vertikal (KPP/Kanwil) selain Pusat.</li>
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
-                        <p class="mt-3 text-sm text-slate-600">Pengajuan, verifikasi, hingga penerbitan surat keputusan dilakukan penuh secara digital dengan jejak audit yang jelas.</p>
-                    </div>
-                    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                        <div class="flex items-center gap-3 text-navy">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.75a3 3 0 100 6 3 3 0 000-6z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.5 12a7.5 7.5 0 11-15 0 7.5 7.5 0 0115 0z" /></svg>
-                            <h3 class="text-lg font-semibold">Transparansi Proses</h3>
-                        </div>
-                        <p class="mt-3 text-sm text-slate-600">Status permohonan dapat dipantau oleh pemohon dan petugas, memastikan keterbukaan setiap tahap.</p>
-                    </div>
-                    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                        <div class="flex items-center gap-3 text-navy">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.5 6.75h15M4.5 12h15M4.5 17.25H12" /></svg>
-                            <h3 class="text-lg font-semibold">Efisiensi Verifikasi</h3>
-                        </div>
-                        <p class="mt-3 text-sm text-slate-600">Alur verifikasi berlapis dengan notifikasi terarah mempersingkat waktu proses persetujuan.</p>
-                    </div>
-                    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                        <div class="flex items-center gap-3 text-navy">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.75v4.5m0 0v4.5m0-4.5h4.5m-4.5 0H7.5" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.5 5.25h15a.75.75 0 01.75.75v12a.75.75 0 01-.75.75h-15a.75.75 0 01-.75-.75v-12a.75.75 0 01.75-.75z" /></svg>
-                            <h3 class="text-lg font-semibold">Dokumen Terpusat</h3>
-                        </div>
-                        <p class="mt-3 text-sm text-slate-600">Proposal, kuisioner, hingga surat keputusan tersimpan aman dan mudah ditelusuri.</p>
                     </div>
                 </div>
-            </div>
-        </section>
 
-        <section id="alur" class="bg-white py-16">
-            <div class="mx-auto max-w-6xl px-4 lg:px-6">
-                <div class="text-center">
-                    <p class="text-sm font-semibold uppercase tracking-[0.25em] text-navy">Alur Permohonan Riset</p>
-                    <h2 class="mt-3 text-3xl font-bold text-slate-900">Langkah Resmi dan Terstruktur</h2>
-                    <p class="mt-3 text-base text-slate-600">Memastikan setiap permohonan diproses dengan standar layanan DJBC.</p>
-                </div>
-                <div class="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                    <div class="relative rounded-xl border border-slate-200 bg-slate-50 p-6">
-                        <div class="flex items-center justify-between">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-navy text-white">1</div>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-navy" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.5 6.75h15m-15 4.5h15m-15 4.5h9.75" /></svg>
+                <div id="tab-hasil" class="tab-content">
+                    <div class="flex flex-col items-center justify-center py-16 text-center">
+                        <div class="bg-blue-50 p-6 rounded-full mb-6 animate-bounce">
+                            <svg class="w-12 h-12 text-primary" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
+                                </path>
+                            </svg>
                         </div>
-                        <h3 class="mt-4 text-lg font-semibold text-slate-900">Pemohon mengajukan permohonan</h3>
-                        <p class="mt-2 text-sm text-slate-600">Registrasi akun dan isi formulir permohonan riset sesuai ketentuan.</p>
-                    </div>
-                    <div class="relative rounded-xl border border-slate-200 bg-slate-50 p-6">
-                        <div class="flex items-center justify-between">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-navy text-white">2</div>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-navy" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h3.75M9 15h3.75M9 9h6.75M9 6h6.75M4.5 12h.008v.008H4.5V12zM4.5 15h.008v.008H4.5V15zM4.5 9h.008v.008H4.5V9zM4.5 6h.008v.008H4.5V6z" /></svg>
-                        </div>
-                        <h3 class="mt-4 text-lg font-semibold text-slate-900">Unggah dokumen</h3>
-                        <p class="mt-2 text-sm text-slate-600">Proposal, kuisioner, surat rekomendasi, dan dokumen pendukung lainnya.</p>
-                    </div>
-                    <div class="relative rounded-xl border border-slate-200 bg-slate-50 p-6">
-                        <div class="flex items-center justify-between">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-navy text-white">3</div>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-navy" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.75l7.5 10.5h-15L12 6.75z" /></svg>
-                        </div>
-                        <h3 class="mt-4 text-lg font-semibold text-slate-900">Verifikasi petugas DJBC</h3>
-                        <p class="mt-2 text-sm text-slate-600">Pemeriksaan kelengkapan dokumen, kesesuaian tema riset, dan kepatuhan.</p>
-                    </div>
-                    <div class="relative rounded-xl border border-slate-200 bg-slate-50 p-6">
-                        <div class="flex items-center justify-between">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-navy text-white">4</div>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-navy" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12.75l2.25 2.25L15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        </div>
-                        <h3 class="mt-4 text-lg font-semibold text-slate-900">Persetujuan atau penolakan</h3>
-                        <p class="mt-2 text-sm text-slate-600">Hasil disampaikan secara resmi dan dapat diunduh dalam bentuk surat keputusan.</p>
+                        <h4 class="text-2xl font-bold text-primary mb-3">Daftar Hasil Riset</h4>
+                        <p class="text-gray-600 max-w-xl mb-8 leading-relaxed text-sm md:text-base">
+                            Hasil penelitian yang dilakukan dengan izin riset DJP diarsipkan oleh Perpustakaan DJP.
+                            Silakan datang langsung ke Perpustakaan DJP jika ingin membaca hasil riset. Daftar hasil
+                            riset dapat dilihat pada:
+                        </p>
+                        <a href="https://edukasi.pajak.go.id/kunjung-perpus/riset" target="_blank"
+                            class="inline-flex items-center gap-3 px-8 py-4 bg-secondary text-primary font-bold rounded-full hover:bg-yellow-400 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                            <span>Kunjungi Perpustakaan DJP</span>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14">
+                                </path>
+                            </svg>
+                        </a>
                     </div>
                 </div>
-            </div>
-        </section>
 
-        <section class="mx-auto max-w-6xl px-4 py-16 lg:px-6">
-            <div class="text-center">
-                <p class="text-sm font-semibold uppercase tracking-[0.25em] text-navy">Jenis Pengguna</p>
-                <h2 class="mt-3 text-3xl font-bold text-slate-900">Peran Pemohon dan Petugas</h2>
-                <p class="mt-3 text-base text-slate-600">Didesain untuk kebutuhan mahasiswa, peneliti, dan petugas DJBC.</p>
-            </div>
-            <div class="mt-10 grid gap-6 md:grid-cols-2">
-                <div class="rounded-xl border border-slate-200 bg-white p-7 shadow-sm">
-                    <div class="flex items-center gap-3 text-navy">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 12.75c1.864 0 3.375-1.511 3.375-3.375S13.864 6 12 6 8.625 7.511 8.625 9.375 10.136 12.75 12 12.75z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6.75 20.25a5.25 5.25 0 0110.5 0" /></svg>
-                        <h3 class="text-lg font-semibold">Pemohon (Mahasiswa & Peneliti)</h3>
-                    </div>
-                    <p class="mt-3 text-sm text-slate-600">Mengajukan permohonan, mengunggah dokumen, memantau status, serta menerima surat keputusan secara daring.</p>
-                    <ul class="mt-4 space-y-2 text-sm text-slate-700">
-                        <li class="flex items-start gap-2"><span class="mt-1 inline-block h-2 w-2 rounded-full bg-gold"></span>Dashboard status permohonan</li>
-                        <li class="flex items-start gap-2"><span class="mt-1 inline-block h-2 w-2 rounded-full bg-gold"></span>Notifikasi tahap verifikasi</li>
-                        <li class="flex items-start gap-2"><span class="mt-1 inline-block h-2 w-2 rounded-full bg-gold"></span>Unduh surat keputusan resmi</li>
-                    </ul>
-                </div>
-                <div class="rounded-xl border border-slate-200 bg-white p-7 shadow-sm">
-                    <div class="flex items-center gap-3 text-navy">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.75v3.75m0 0v3.75m0-3.75h3.75M12 10.5H8.25" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.5 5.25h15a.75.75 0 01.75.75v12a.75.75 0 01-.75.75h-15a.75.75 0 01-.75-.75v-12a.75.75 0 01.75-.75z" /></svg>
-                        <h3 class="text-lg font-semibold">Petugas DJBC</h3>
-                    </div>
-                    <p class="mt-3 text-sm text-slate-600">Melakukan verifikasi, memberikan catatan, menerbitkan persetujuan atau penolakan dengan standar pelayanan DJBC.</p>
-                    <ul class="mt-4 space-y-2 text-sm text-slate-700">
-                        <li class="flex items-start gap-2"><span class="mt-1 inline-block h-2 w-2 rounded-full bg-gold"></span>Manajemen antrian permohonan</li>
-                        <li class="flex items-start gap-2"><span class="mt-1 inline-block h-2 w-2 rounded-full bg-gold"></span>Checklist kelengkapan dokumen</li>
-                        <li class="flex items-start gap-2"><span class="mt-1 inline-block h-2 w-2 rounded-full bg-gold"></span>Output surat keputusan terstandar</li>
-                    </ul>
-                </div>
-            </div>
-        </section>
+                <div id="tab-faq" class="tab-content space-y-4">
+                    <h3 class="text-xl font-bold text-primary mb-6">Pertanyaan Umum (FAQ)</h3>
 
-        <section id="cta" class="bg-navy py-16 text-white">
-            <div class="mx-auto flex max-w-6xl flex-col items-center gap-6 px-4 text-center lg:px-6">
-                {{-- <p class="text-sm font-semibold uppercase tracking-[0.25em] text-gold">Call To Action</p> --}}
-                <h2 class="text-3xl font-bold lg:text-4xl">Ajukan Permohonan Riset Anda Secara Resmi dan Terintegrasi</h2>
-                <p class="max-w-3xl text-base text-slate-200">Gunakan platform resmi DJBC untuk memastikan proses permohonan riset berjalan sesuai ketentuan, cepat, dan terdokumentasi dengan baik.</p>
-                <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-                    <a href="{{ route('login') }}" class="rounded-full bg-gold px-6 py-3 text-base font-semibold text-slate-900 shadow-lg shadow-amber-200/30 hover:bg-[#c49c2f]">Ajukan Sekarang</a>
-                </div>
-            </div>
-        </section>
-    </main>
+                    <div class="space-y-3">
+                        <div class="border border-gray-200 rounded-lg">
+                            <button onclick="toggleAccordion('faq-1')"
+                                class="w-full flex justify-between items-center p-4 font-semibold text-left hover:bg-gray-50 transition">
+                                <span class="text-sm md:text-base">Berapa lama proses izin riset?</span>
+                                <svg id="icon-faq-1" class="w-5 h-5 text-gray-400 transform transition-transform"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            <div id="faq-1" class="hidden p-4 text-sm text-gray-600 border-t bg-gray-50">
+                                Proses bervariasi tergantung kelengkapan berkas dan konfirmasi data dari unit terkait.
+                                Estimasi waktu akan diinformasikan melalui notifikasi di dashboard akun Anda.
+                            </div>
+                        </div>
 
-{{-- <<<<<<< HEAD
-    <footer class="bg-dark text-white text-center py-4">
-        <div class="container">
-            <p class="mb-2">&copy; 2025 E-Riset Bea Cukai. All Rights Reserved.</p> --}}
-{{-- ======= --}}
-    <footer class="border-t border-slate-200 bg-white py-8">
-        <div class="mx-auto flex max-w-6xl flex-col gap-4 px-4 text-sm text-slate-700 lg:flex-row lg:items-center lg:justify-between lg:px-6">
-{{-- >>>>>>> b6afdbc73e698d6c2cd4e568df2b437698209599 --}}
-            <div>
-                <p class="font-semibold text-navy">Direktorat Jenderal Bea dan Cukai</p>
-                <p class="text-slate-600">Platform E-Riset DJBC &copy; 2025</p>
+                        <div class="border border-gray-200 rounded-lg">
+                            <button onclick="toggleAccordion('faq-2')"
+                                class="w-full flex justify-between items-center p-4 font-semibold text-left hover:bg-gray-50 transition">
+                                <span class="text-sm md:text-base">Apakah ada biaya pengajuan?</span>
+                                <svg id="icon-faq-2" class="w-5 h-5 text-gray-400 transform transition-transform"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            <div id="faq-2" class="hidden p-4 text-sm text-gray-600 border-t bg-gray-50">
+                                <strong>Tidak ada biaya (Gratis).</strong> Seluruh layanan permohonan izin riset di
+                                lingkungan DJP tidak dipungut biaya apapun.
+                            </div>
+                        </div>
+
+                        <div class="border border-gray-200 rounded-lg">
+                            <button onclick="toggleAccordion('faq-3')"
+                                class="w-full flex justify-between items-center p-4 font-semibold text-left hover:bg-gray-50 transition">
+                                <span class="text-sm md:text-base">Bagaimana jika permohonan ditolak?</span>
+                                <svg id="icon-faq-3" class="w-5 h-5 text-gray-400 transform transition-transform"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            <div id="faq-3" class="hidden p-4 text-sm text-gray-600 border-t bg-gray-50">
+                                Anda akan menerima notifikasi email beserta alasan penolakan. Anda diperbolehkan
+                                mengajukan permohonan ulang setelah melengkapi persyaratan atau menyesuaikan topik
+                                riset.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-kontak" class="tab-content">
+                    <div class="flex flex-col items-center justify-center py-12 text-center">
+                        <div
+                            class="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mb-6 text-primary">
+                            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
+                                </path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-2xl font-bold text-primary mb-2">Hubungi Kami</h3>
+                        <p class="text-gray-500 mb-6">Direktorat Penyuluhan, Pelayanan, dan Hubungan Masyarakat</p>
+
+                        <div class="grid gap-4 w-full max-w-md">
+                            <div
+                                class="flex items-center gap-4 p-4 border rounded-lg hover:border-primary hover:bg-blue-50 transition bg-white shadow-sm">
+                                <div class="bg-primary/10 p-2 rounded-full text-primary">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                                        </path>
+                                    </svg>
+                                </div>
+                                <div class="text-left">
+                                    <p class="text-xs text-gray-500 uppercase font-bold">Email</p>
+                                    <p class="text-primary font-medium">riset@pajak.go.id</p>
+                                </div>
+                            </div>
+
+                            <div
+                                class="flex items-center gap-4 p-4 border rounded-lg hover:border-primary hover:bg-blue-50 transition bg-white shadow-sm">
+                                <div class="bg-primary/10 p-2 rounded-full text-primary">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
+                                        </path>
+                                    </svg>
+                                </div>
+                                <div class="text-left">
+                                    <p class="text-xs text-gray-500 uppercase font-bold">Alamat Kantor</p>
+                                    <p class="text-primary font-medium text-sm">Jl. Jenderal Gatot Subroto No. 40-42,
+                                        Jakarta 12190</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
-            <div class="flex gap-4 text-slate-600">
-                <span>Jl. Jalan ke pasar malam </span>
-                <span class="hidden lg:inline">|</span>
-                <span>Kontak: informasi@beacukai.go.id</span>
-            </div>
+        </div>
+    </section>
+
+    <footer class="bg-primary text-white text-center text-sm py-8 border-t border-white/10">
+        <div class="max-w-7xl mx-auto px-6">
+            <p class="font-medium">© 2025 Direktorat Jenderal Pajak. Hak Cipta Dilindungi Undang-Undang.</p>
         </div>
     </footer>
 
     <script>
-        const nav = document.getElementById('main-nav');
-        const menuToggle = document.getElementById('menu-toggle');
-        const mobileMenu = document.getElementById('mobile-menu');
-
-        const handleNavStyle = () => {
-            if (window.scrollY > 10) {
-                nav.classList.add('bg-white/95', 'shadow-md', 'backdrop-blur');
-            } else {
-                nav.classList.remove('bg-white/95', 'shadow-md', 'backdrop-blur');
+        // --- TAB LOGIC ---
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove("active");
             }
-        };
 
-        handleNavStyle();
-        window.addEventListener('scroll', handleNavStyle);
+            tablinks = document.getElementsByClassName("tab-btn");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove("border-primary", "text-primary", "font-bold", "active");
+                tablinks[i].classList.add("border-transparent", "text-gray-500", "font-medium");
+            }
 
-        menuToggle.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.remove("border-transparent", "text-gray-500", "font-medium");
+            evt.currentTarget.classList.add("border-primary", "text-primary", "font-bold", "active");
+        }
+
+        // --- ACCORDION LOGIC ---
+        function toggleAccordion(id) {
+            var content = document.getElementById(id);
+            var icon = document.getElementById('icon-' + id);
+
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                icon.classList.add('rotate-180');
+            } else {
+                content.classList.add('hidden');
+                icon.classList.remove('rotate-180');
+            }
+        }
+
+        // --- CAROUSEL LOGIC ---
+        const track = document.getElementById('heroCarousel');
+        const slides = Array.from(track.children);
+        const indicators = document.querySelectorAll('.indicator');
+        let currentSlide = 0;
+        const slideCount = slides.length;
+
+        // Variabel untuk Swipe
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        function updateSlidePosition() {
+            track.style.transform = `translateX(-${currentSlide * 100}%)`;
+
+            indicators.forEach((ind, index) => {
+                if (index === currentSlide) {
+                    ind.classList.remove('bg-white/40');
+                    ind.classList.add('bg-secondary');
+                } else {
+                    ind.classList.add('bg-white/40');
+                    ind.classList.remove('bg-secondary');
+                }
+            });
+        }
+
+        function moveSlide(direction) {
+            currentSlide = (currentSlide + direction + slideCount) % slideCount;
+            updateSlidePosition();
+            resetAutoSlide();
+        }
+
+        function goToSlide(index) {
+            currentSlide = index;
+            updateSlidePosition();
+            resetAutoSlide();
+        }
+
+        // --- SWIPE LOGIC ---
+        track.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+            resetAutoSlide(); // Pause auto slide saat user menyentuh
         });
+
+        track.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        // Mouse Events untuk Desktop (Optional: Click and Drag)
+        track.addEventListener('mousedown', (e) => {
+            touchStartX = e.screenX;
+            resetAutoSlide();
+        });
+
+        track.addEventListener('mouseup', (e) => {
+            touchEndX = e.screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            const threshold = 50; // Jarak minimal swipe agar dianggap geser
+            if (touchStartX - touchEndX > threshold) {
+                // Swipe Kiri (Next)
+                moveSlide(1);
+            } else if (touchEndX - touchStartX > threshold) {
+                // Swipe Kanan (Prev)
+                moveSlide(-1);
+            }
+        }
+
+        // --- AUTO SLIDE ---
+        let slideInterval = setInterval(() => {
+            currentSlide = (currentSlide + 1) % slideCount;
+            updateSlidePosition();
+        }, 5000);
+
+        function resetAutoSlide() {
+            clearInterval(slideInterval);
+            slideInterval = setInterval(() => {
+                currentSlide = (currentSlide + 1) % slideCount;
+                updateSlidePosition();
+            }, 5000);
+        }
+
+        // Initialize first state
+        updateSlidePosition();
     </script>
 </body>
+
 </html>
