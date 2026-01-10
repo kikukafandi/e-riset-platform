@@ -13,8 +13,8 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: '#202c5f', // Navy DJP
-                        secondary: '#FFD400', // Kuning DJP
+                        primary: '#202c5f', // Navy DJBC
+                        secondary: '#FFD400', // Kuning DJBC
                         accent: '#F3F4F6'
                     },
                     fontFamily: {
@@ -172,7 +172,7 @@
                 <div class="flex whitespace-nowrap px-4 md:px-6 pt-2">
                     <button onclick="openTab(event, 'tab-info')"
                         class="tab-btn active border-b-4 border-primary text-primary font-bold px-4 md:px-5 py-3 md:py-4 hover:bg-gray-50 transition-colors text-sm md:text-base outline-none">
-                        Riset di Lingkungan DJP
+                        Riset di Lingkungan DJBC
                     </button>
                     <button onclick="openTab(event, 'tab-ketentuan')"
                         class="tab-btn border-b-4 border-transparent text-gray-500 font-medium px-4 md:px-5 py-3 md:py-4 hover:text-primary hover:bg-gray-50 transition-colors text-sm md:text-base outline-none">
@@ -197,13 +197,13 @@
                 <div id="tab-info" class="tab-content active">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-start">
                         <div class="relative group w-full rounded-xl overflow-hidden">
-                            <img src="https://eriset.pajak.go.id/image/content-1.svg" alt="Gedung DJP"
+                            <img src="https://eriset.pajak.go.id/image/content-1.svg" alt="Gedung DJBC"
                                 class="w-full h-auto object-cover transform group-hover:scale-105 transition duration-500">
                         </div>
 
                         <div class="space-y-6 text-gray-600">
                             <div>
-                                <h3 class="text-2xl font-bold text-primary mb-2">DJP dan Riset Perpajakan</h3>
+                                <h3 class="text-2xl font-bold text-primary mb-2">DJBC dan Riset Perpajakan</h3>
                                 <div class="w-16 h-1 bg-secondary rounded-full"></div>
                             </div>
                             <p class="leading-relaxed text-sm md:text-base">
@@ -211,9 +211,9 @@
                                 Penerimaan Negara melalui Penyelenggaraan Administrasi Perpajakan yang Efisien, Efektif,
                                 Berintegritas, dan Berkeadilan dalam rangka mendukung Visi Kementerian Keuangan:
                                 "Menjadi Pengelola Keuangan Negara untuk Mewujudkan Perekonomian Indonesia yang
-                                Produktif, Kompetitif, Inklusif dan Berkeadilan”, Direktorat Jenderal Pajak (DJP)
+                                Produktif, Kompetitif, Inklusif dan Berkeadilan”, Direktorat Jenderal Pajak (DJBC)
                                 senantiasa mengembangkan kebijakan di bidang perpajakan. Riset merupakan salah satu
-                                dasar acuan yang digunakan dalam pengembangan kebijakan di DJP.
+                                dasar acuan yang digunakan dalam pengembangan kebijakan di DJBC.
                             </p>
                             <p class="leading-relaxed text-sm md:text-base">
                                 Riset adalah kegiatan penelitian sebagaimana dimaksud dalam peraturan perundang-undangan
@@ -227,7 +227,7 @@
                                         <path
                                             d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" />
                                     </svg>
-                                    DJP menghimpun sembilan rumpun tema riset di bidang perpajakan:
+                                    DJBC menghimpun sembilan rumpun tema riset di bidang perpajakan:
                                 </h4>
                                 <ul class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm ml-2">
                                     <li class="flex items-center gap-2"><span
@@ -241,7 +241,7 @@
                                         Informasi Perpajakan</li>
                                     <li class="flex items-center gap-2"><span
                                             class="w-1.5 h-1.5 bg-secondary rounded-full flex-shrink-0"></span>SDM dan
-                                        Organisasi DJP</li>
+                                        Organisasi DJBC</li>
                                     <li class="flex items-center gap-2"><span
                                             class="w-1.5 h-1.5 bg-secondary rounded-full flex-shrink-0"></span>Edukasi
                                         Perpajakan</li>
@@ -263,8 +263,8 @@
                             <div class="bg-yellow-50 p-4 rounded-xl border border-yellow-100">
                                 <h4 class="font-bold text-primary mb-2 text-sm md:text-base">Surat Izin Riset</h4>
                                 <p class="text-sm md:text-base text-gray-700">Setiap mahasiswa atau masyarakat atau
-                                    badan/lembaga yang akan melakukan penelitian atau riset di lingkungan DJP wajib
-                                    memperoleh surat izin riset dari DJP.</p>
+                                    badan/lembaga yang akan melakukan penelitian atau riset di lingkungan DJBC wajib
+                                    memperoleh surat izin riset dari DJBC.</p>
                             </div>
                         </div>
                     </div>
@@ -346,7 +346,7 @@
                                     </ul>
                                 </div>
                                 <div class="p-4 rounded-lg border border-yellow-100 bg-yellow-50/50">
-                                    <strong class="text-yellow-800 block mb-2">Kantor Wilayah (Kanwil DJP)</strong>
+                                    <strong class="text-yellow-800 block mb-2">Kantor Wilayah (Kanwil DJBC)</strong>
                                     <ul class="list-disc ml-4 text-xs space-y-1">
                                         <li>Mahasiswa D3, D4, S1.</li>
                                         <li>Lokasi riset di unit vertikal (KPP/Kanwil) selain Pusat.</li>
@@ -369,13 +369,13 @@
                         </div>
                         <h4 class="text-2xl font-bold text-primary mb-3">Daftar Hasil Riset</h4>
                         <p class="text-gray-600 max-w-xl mb-8 leading-relaxed text-sm md:text-base">
-                            Hasil penelitian yang dilakukan dengan izin riset DJP diarsipkan oleh Perpustakaan DJP.
-                            Silakan datang langsung ke Perpustakaan DJP jika ingin membaca hasil riset. Daftar hasil
+                            Hasil penelitian yang dilakukan dengan izin riset DJBC diarsipkan oleh Perpustakaan DJBC.
+                            Silakan datang langsung ke Perpustakaan DJBC jika ingin membaca hasil riset. Daftar hasil
                             riset dapat dilihat pada:
                         </p>
                         <a href="https://edukasi.pajak.go.id/kunjung-perpus/riset" target="_blank"
                             class="inline-flex items-center gap-3 px-8 py-4 bg-secondary text-primary font-bold rounded-full hover:bg-yellow-400 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1">
-                            <span>Kunjungi Perpustakaan DJP</span>
+                            <span>Kunjungi Perpustakaan DJBC</span>
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14">
@@ -417,7 +417,7 @@
                             </button>
                             <div id="faq-2" class="hidden p-4 text-sm text-gray-600 border-t bg-gray-50">
                                 <strong>Tidak ada biaya (Gratis).</strong> Seluruh layanan permohonan izin riset di
-                                lingkungan DJP tidak dipungut biaya apapun.
+                                lingkungan DJBC tidak dipungut biaya apapun.
                             </div>
                         </div>
 
@@ -496,7 +496,7 @@
 
     <footer class="bg-primary text-white text-center text-sm py-8 border-t border-white/10">
         <div class="max-w-7xl mx-auto px-6">
-            <p class="font-medium">© 2025 Direktorat Jenderal Pajak. Hak Cipta Dilindungi Undang-Undang.</p>
+            <p class="font-medium">© 2025 Direktorat Jendral Bea Cukai. Hak Cipta Dilindungi Undang-Undang.</p>
         </div>
     </footer>
 
