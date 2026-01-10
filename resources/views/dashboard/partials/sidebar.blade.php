@@ -107,6 +107,10 @@
                         <div class="sb-nav-link-icon"><i class="fas fa-road"></i></div>
                         Timeline Progress
                     </a>
+                    <a class="nav-link" href="{{ route('profile.edit') }}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-profile"></i></div>
+                        Profil Saya
+                    </a>
                     {{-- <a class="nav-link" href="{{ route('dokumen.status') }}">
                         <div class="sb-nav-link-icon"><i class="fas fa-list"></i></div>
                         Status Pengajuan

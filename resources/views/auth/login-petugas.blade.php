@@ -44,7 +44,14 @@
             class="hidden lg:flex lg:w-2/5 bg-gradient-to-br from-navy via-slate-900 to-slate-950 text-white flex-col justify-center px-12">
             <div class="mb-8">
                 <div class="flex items-center gap-3 mb-6">
-                   
+                    <div
+                        class="flex h-12 w-12 items-center justify-center rounded-lg bg-white text-navy font-bold text-lg">
+                        DJ</div>
+                    <div>
+                        <p class="text-xs font-semibold text-gold tracking-widest">DIREKTORAT JENDERAL</p>
+                        <p class="text-lg font-bold leading-tight">Bea dan Cukai</p>
+                    </div>
+                </div>
                 <h2 class="text-3xl font-bold mb-4">Platform E-Riset DJBC</h2>
                 <p class="text-slate-300 leading-relaxed">Portal khusus petugas untuk mengelola permohonan riset secara
                     efisien dan terintegrasi.</p>
@@ -96,12 +103,16 @@
             <div class="w-full max-w-md">
                 <div class="lg:hidden mb-8 text-center">
                     <div class="flex items-center justify-center gap-2 mb-4">
+                        <div
+                            class="flex h-10 w-10 items-center justify-center rounded-lg bg-navy text-white font-semibold">
+                            DJ</div>
                         <div class="text-left">
-                            <p class="text-xs font-semibold text-gold tracking-wide">E-RISET</p>
+                            <p class="text-xs font-semibold text-gold tracking-wide">DIREKTORAT JENDERAL</p>
                             <p class="text-sm font-bold text-navy leading-tight">Bea dan Cukai</p>
                         </div>
                     </div>
                 </div>
+
                 <div class="bg-white rounded-lg shadow-lg border border-slate-200 overflow-hidden">
                     <div class="px-8 py-6 border-b border-slate-200 bg-slate-50">
                         <div class="flex items-center gap-3 mb-2">
@@ -166,7 +177,7 @@
                                 <input type="email" id="inputEmail" name="email" value="{{ old('email') }}"
                                     required
                                     class="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/20"
-                                    placeholder="nama@customs.go.id">
+                                    placeholder="email@beacukai.go.id">
                             </div>
 
                             <div>
@@ -244,4 +255,4 @@
     </script>
 </body>
 
-</html>
+</html> 
