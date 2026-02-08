@@ -10,9 +10,19 @@ use Illuminate\Support\Facades\Hash;
 
 class PetugasController extends Controller
 {
-    public function loginPetugasView()
+    public function loginPage()
     {
-        return view('auth.login-petugas');
+        // Jika user sudah login sebagai pemohon (guard web), lempar ke dashboard pemohon
+        if (Auth::guard('web')->check()) {
+            return redirect()->route('dashboardPage');
+        }
+
+        // Jika user sudah login sebagai petugas, lempar ke dashboard petugas
+        if (Auth::guard('petugas')->check()) {
+            return redirect()->route('dashboard.petugas');
+        }
+
+        return view('auth.login');
     }
 
     public function loginPetugas(Request $request)
@@ -22,6 +32,10 @@ class PetugasController extends Controller
             'email' => 'required|email',
             'password' => 'required|string',
         ]);
+
+        if (Auth::guard('web')->check()) {
+            Auth::guard('web')->logout();
+        }
 
         // cek login pakai guard petugas
         if (Auth::guard('petugas')->attempt($credentials, $request->filled('remember'))) {
@@ -138,7 +152,7 @@ class PetugasController extends Controller
         ]);
 
         $data = $request->only(['nama', 'email', 'nip', 'jabatan', 'role', 'kantor_id']);
-        
+
         // Set default password jika tidak diisi
         $data['password'] = Hash::make($request->password ?? 'password123');
         $data['is_active'] = true;

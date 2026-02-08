@@ -11,9 +11,18 @@ class AuthController extends Controller
 {
     public function loginPage()
     {
+        // Jika user sudah login sebagai pemohon (guard web), lempar ke dashboard pemohon
+        if (Auth::guard('web')->check()) {
+            return redirect()->route('dashboardPage');
+        }
+
+        // Jika user sudah login sebagai petugas, lempar ke dashboard petugas
+        if (Auth::guard('petugas')->check()) {
+            return redirect()->route('dashboard.petugas');
+        }
+
         return view('auth.login');
     }
-
     public function registerPage()
     {
         return view('auth.register');
@@ -27,6 +36,9 @@ class AuthController extends Controller
             'email' => 'required|email',
             'password' => 'required|string|min:6',
         ]);
+        if (Auth::guard('petugas')->check()) {
+            Auth::guard('petugas')->logout();
+        }
 
         // cari user
         $user = User::where('email', $credentials['email'])->first();
@@ -79,7 +91,7 @@ class AuthController extends Controller
 
             // Validasi NIP maksimal 18 digit jika pegawai Bea Cukai
             if ($request->input('is_pegawai') === 'ya') {
-                $rules['npwp'] = ['required','regex:/^[0-9]{1,18}$/'];
+                $rules['npwp'] = ['required', 'regex:/^[0-9]{1,18}$/'];
             }
 
             $validated = $request->validate($rules, [

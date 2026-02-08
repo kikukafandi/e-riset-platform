@@ -21,6 +21,12 @@ class RedirectIfAuthenticated
 
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
+                // Jika yang login adalah petugas, arahkan ke dashboard petugas
+                if ($guard === 'petugas') {
+                    return redirect()->route('dashboard.petugas');
+                }
+
+                // Jika yang login adalah pemohon (web), arahkan ke dashboard utama
                 return redirect(RouteServiceProvider::HOME);
             }
         }
